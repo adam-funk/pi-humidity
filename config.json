@@ -1,0 +1,12 @@
+{
+  "sensors":
+  [
+    {
+      "led_pin": 24,
+      "sensor_pin": 23,
+      "identifier": "cellar"
+    }
+  ],
+  "url": "http://192.168.123.7:8089/data",
+  "local_file": "/home/pi/cellar.tsv"
+}
