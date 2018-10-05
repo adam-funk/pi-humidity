@@ -15,8 +15,8 @@ with open(data_file, 'r') as f:
     for line in f.readlines():
         line_data = line.rstrip().split('\t')
         epoch = int(line_data[0])
-        temp  = float(line_data[3])
-        hum   = float(line_data[4])
+        temp = float(line_data[3])
+        hum = float(line_data[4])
         if (-10 < temp < 150) and (-1 < hum < 101):
             nepoch = numpy.datetime64(epoch, 's')
             timestamps.append(nepoch)
@@ -24,7 +24,7 @@ with open(data_file, 'r') as f:
             humidities.append(hum)
         else:
             print("Rejected", epoch, temp, hum)
-        
+
 plt.ion()
 
 fig, ax = plt.subplots()
@@ -36,7 +36,7 @@ ax.format_xdata = daysFmt
 fig.autofmt_xdate()
 
 ax.plot(timestamps, temperatures, 'b,-',
-         timestamps, humidities, 'g,-')
+        timestamps, humidities, 'g,-')
 
 # https://matplotlib.org/gallery/text_labels_and_annotations/date.html
 # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots

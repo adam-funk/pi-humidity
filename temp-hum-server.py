@@ -6,6 +6,7 @@ import datetime, json
 
 data_file = '/home/adam/home-data.tsv'
 
+
 @post('/data')
 def take_data():
     j = request.json
@@ -16,5 +17,6 @@ def take_data():
                                          j['id'], j['temperature'], j['humidity'])
         f.write(line)
     return 'OK'
+
 
 run(host='0.0.0.0', port=8089, debug=True)

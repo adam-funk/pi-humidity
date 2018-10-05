@@ -9,6 +9,7 @@ identifier = 'cellar'
 log_url = 'http://192.168.123.7:8089/data'
 local_file = '/home/pi/cellar.tsv'
 
+
 def signal(blinks, pause):
     for i in range(0, blinks):
         pi.write(led_pin, 1)
@@ -16,6 +17,7 @@ def signal(blinks, pause):
         pi.write(led_pin, 0)
         time.sleep(pause)
     return
+
 
 def process(sensor, options):
     sensor.trigger()
@@ -32,6 +34,7 @@ def process(sensor, options):
     else:
         signal(5, 0.3)
     return (t, h, epoch, iso_time)
+
 
 def log(temperature, humidity, epoch, iso_time, options):
     with open(local_file, 'a') as f:
@@ -50,6 +53,7 @@ def log(temperature, humidity, epoch, iso_time, options):
     if response.status_code != 200:
         signal(20, 0.2)
     return
+
 
 oparser = argparse.ArgumentParser(description="...",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
