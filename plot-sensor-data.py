@@ -1,5 +1,5 @@
-import matplotlib, numpy
 import matplotlib.pyplot as plt
+import numpy
 from matplotlib import dates
 
 data_file = 'home-data.tsv'

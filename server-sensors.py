@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-from bottle import route, run, post, request, static_file, response, template
-
-import datetime, json
+from bottle import run, post, request
 
 data_file = '/home/adam/home-data.tsv'
 
@@ -19,4 +17,5 @@ def take_data():
     return 'OK'
 
 
+# 0.0.0.0 makes it available on the LAN
 run(host='0.0.0.0', port=8089, debug=True)
