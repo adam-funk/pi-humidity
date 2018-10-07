@@ -46,8 +46,17 @@ def read_raw_data(data_file):
     return data_to_use
 
 
-def average_data(data_to_use):
-    raw_times = list(data_to_use.keys())
+def reverse_days(max_days=None):
+    if max_days:
+        backdate = (datetime.date.today() - datetime.timedelta(days=max_days))
+        return int(datetime.datetime.combine(backdate,
+                                             datetime.time(0, 0, 0)).timestamp())
+    return 0
+
+
+def average_data(data_to_use, max_days=None):
+    min_timestamp = reverse_days(max_days)
+    raw_times = [ ts for ts in data_to_use.keys() if ts >= min_timestamp ]
     raw_times.sort()
     timestamps = []
     temperatures = []
@@ -68,13 +77,15 @@ def average_data(data_to_use):
     return timestamps, temperatures, humidities
 
 
-def daily_data(data_to_use):
+def daily_data(data_to_use, max_days=None):
+    min_timestamp = reverse_days(max_days)
     daily_temperatures = defaultdict(list)
     daily_humidities = defaultdict(list)
     for timestamp, (temp, hum) in data_to_use.items():
-        rounded_timestamp = round_down_date(timestamp)
-        daily_temperatures[rounded_timestamp].append(temp)
-        daily_humidities[rounded_timestamp].append(hum)
+        if timestamp >= min_timestamp:
+            rounded_timestamp = round_down_date(timestamp)
+            daily_temperatures[rounded_timestamp].append(temp)
+            daily_humidities[rounded_timestamp].append(hum)
     timestamps = []
     temp_max = []
     temp_min = []
@@ -96,11 +107,10 @@ def daily_data(data_to_use):
 # MAIN
 def read_and_plot(options):
     os.mkdir(default_output_dir)
-    f0 = os.path.join(default_output_dir, 'time.png')
-    f1 = os.path.join(default_output_dir, 'date.png')
+    f0 = os.path.join(default_output_dir, '7_days_smoothed.png')
+    f1 = os.path.join(default_output_dir, '12_days_ranged.png')
 
     general_data = read_raw_data(options.data_file)
-    all_timestamps, all_temperatures, all_humidities = average_data(general_data)
 
     # https://stackoverflow.com/questions/15713279/calling-pylab-savefig-without-display-in-ipython
     if options.visual:
@@ -109,11 +119,16 @@ def read_and_plot(options):
         plt.ioff()
 
     days = dates.DayLocator(interval=1)
+    days_minor = dates.DayLocator(interval=2)
     days_format = dates.DateFormatter('%Y-%m-%d')
 
+    # smoothed plot
+    all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=8)
+
     fig0, ax0 = plt.subplots()
-    ax0.xaxis.set_major_locator(days)
+    ax0.xaxis.set_major_locator(days_minor)
     ax0.xaxis.set_major_formatter(days_format)
+    ax0.xaxis.set_minor_locator(days)
     ax0.format_xdata = days_format
     ax0.plot(all_timestamps, all_temperatures, 'b,-',
              all_timestamps, all_humidities, 'g,-')
@@ -123,11 +138,14 @@ def read_and_plot(options):
     if not options.visual:
         plt.close(fig0)
 
-    datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data)
+
+    # ranged plot
+    datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data, max_days=20)
 
     fig1, ax1 = plt.subplots()
-    ax1.xaxis.set_major_locator(days)
+    ax1.xaxis.set_major_locator(days_minor)
     ax1.xaxis.set_major_formatter(days_format)
+    ax1.xaxis.set_minor_locator(days)
     ax1.format_xdata = days_format
     ax1.plot(datestamps, tmin, 'b-',
              datestamps, tmean, 'b-',
