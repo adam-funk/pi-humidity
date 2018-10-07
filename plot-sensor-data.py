@@ -142,6 +142,11 @@ def read_and_plot(options):
     # ranged plot
     datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data, max_days=20)
 
+    if options.debug_days:
+        mail_log.append('\nDay data:')
+        for stuff in zip(datestamps, tmin, tmean, tmax, hmin, hmean, hmax):
+            mail_log.append(' '.join([str(x) for x in stuff]))
+
     fig1, ax1 = plt.subplots()
     ax1.xaxis.set_major_locator(days_minor)
     ax1.xaxis.set_major_formatter(days_format)
@@ -174,6 +179,11 @@ oparser.add_argument("-v", dest="visual",
                      default=False,
                      action='store_true',
                      help="show plots")
+
+oparser.add_argument("-D", dest="debug_days",
+                     default=False,
+                     action='store_true',
+                     help="debug day ranging")
 
 oparser.add_argument("-m", dest="mail",
                      default=None,
@@ -213,3 +223,7 @@ if options.mail:
                             subtype=imghdr.what(None, img_data))
     with smtplib.SMTP('localhost') as s:
         s.send_message(mail)
+
+else:
+    for text in mail_log:
+        print(text)
