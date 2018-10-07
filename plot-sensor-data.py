@@ -190,7 +190,7 @@ if not options.visual:
 import matplotlib.pyplot as plt
 from matplotlib import dates
 
-mail_log = []
+mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
 
 f0, f1 = read_and_plot(options)
 
@@ -200,8 +200,10 @@ if options.mail:
     mail['To'] = options.mail
     mail['From'] = 'potsmaster@ducksburg.com'
     mail['Subject'] = 'temperature & humidity'
-    mail.preamble = '\n'.join(mail_log)
+
     # https://docs.python.org/3/library/email.examples.html
+    mail.add_attachment('\n'.join(mail_log).encode('utf-8'), maintype='text',
+                        subtype='plain')
     for file in [f0, f1]:
         with open(file, 'rb') as fp:
             img_data = fp.read()
