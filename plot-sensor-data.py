@@ -2,7 +2,6 @@
 
 import argparse
 import datetime
-import email
 import imghdr
 import os
 import smtplib
@@ -123,6 +122,8 @@ def read_and_plot(options):
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
     plt.savefig(f0, dpi=200)
+    if not options.visual:
+        plt.close(fig0)
 
     datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data)
 
@@ -139,6 +140,8 @@ def read_and_plot(options):
              )
     fig1.autofmt_xdate(rotation=60)
     plt.savefig(f1, dpi=200)
+    if not options.visual:
+        plt.close(fig1)
 
     return f0, f1
 
