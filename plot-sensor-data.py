@@ -9,9 +9,7 @@ import time
 from collections import defaultdict
 from email.message import EmailMessage
 
-import matplotlib.pyplot as plt
 import numpy
-from matplotlib import dates
 
 # https://matplotlib.org/gallery/text_labels_and_annotations/date.html
 # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots
@@ -166,6 +164,13 @@ oparser.add_argument("-m", dest="mail",
                      help="send mail to this address")
 
 options = oparser.parse_args()
+
+if not options.visual:
+    import matplotlib
+    matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+from matplotlib import dates
 
 mail_log = []
 
