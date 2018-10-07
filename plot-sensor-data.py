@@ -130,6 +130,7 @@ def read_and_plot(options):
     ax0.xaxis.set_major_formatter(days_format)
     ax0.xaxis.set_minor_locator(days)
     ax0.format_xdata = days_format
+    ax0.grid(True, which='both')
     ax0.plot(all_timestamps, all_temperatures, 'b,-',
              all_timestamps, all_humidities, 'g,-')
     # autofmt needs to happen after data
@@ -152,6 +153,7 @@ def read_and_plot(options):
     ax1.xaxis.set_major_formatter(days_format)
     ax1.xaxis.set_minor_locator(days)
     ax1.format_xdata = days_format
+    ax1.grid(True, which='both')
     ax1.plot(datestamps, tmin, 'b-',
              datestamps, tmean, 'b-',
              datestamps, tmax, 'b-',
