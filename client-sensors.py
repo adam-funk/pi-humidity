@@ -70,10 +70,6 @@ oparser.add_argument("-q", dest="quiet", default=False,
                      action='store_true',
                      help="quiet")
 
-oparser.add_argument("-d", dest="database",
-                     metavar="SQL",
-                     help="database file")
-
 oparser.add_argument("-c", dest="config_file",
                      metavar="JSON",
                      help="config file")
