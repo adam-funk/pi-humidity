@@ -1,33 +1,56 @@
+from collections import defaultdict
+
 import matplotlib.pyplot as plt
 import numpy
 from matplotlib import dates
 
-data_file = 'home-data.tsv'
+default_data_file = '/home/adam/home-data.tsv'
 
-timestamps = []
-temperatures = []
-humidities = []
 
-days = dates.DayLocator(interval=1)
-daysFmt = dates.DateFormatter('%Y-%m-%d')
+def read_data(data_file):
+    # time -> (temp, hum)
+    data_to_use = defaultdict(tuple)
 
-with open(data_file, 'r') as f:
-    for line in f.readlines():
-        line_data = line.rstrip().split('\t')
-        epoch = int(line_data[0])
-        temp = float(line_data[3])
-        hum = float(line_data[4])
-        if (-10 < temp < 150) and (-1 < hum < 101):
-            nepoch = numpy.datetime64(epoch, 's')
-            timestamps.append(nepoch)
-            temperatures.append(temp)
-            humidities.append(hum)
-        else:
-            print("Rejected", epoch, temp, hum)
+    with open(data_file, 'r') as f:
+        for line in f.readlines():
+            line_data = line.rstrip().split('\t')
+            epoch = int(line_data[0])
+            temp = float(line_data[3])
+            hum = float(line_data[4])
+            if (-10 < temp < 150) and (-1 < hum < 101):
+                data_to_use[epoch] = (temp, hum)
+            else:
+                print("Rejected", epoch, temp, hum)
+    raw_times = list(data_to_use.keys())
+    raw_times.sort()
+    timestamps = []
+    temperatures = []
+    humidities = []
+    prev_epoch = raw_times[0]
+    prev_temp = data_to_use[prev_epoch][0]
+    prev_hum = data_to_use[prev_epoch][1]
+    for epoch in raw_times[1:]:
+        timestamps.append(numpy.datetime64((prev_epoch + epoch)//2, 's'))
+        temp = data_to_use[epoch][0]
+        hum = data_to_use[epoch][1]
+        temperatures.append((prev_temp + temp)/2)
+        humidities.append((prev_hum + hum)/2)
+        prev_epoch = epoch
+        prev_temp = temp
+        prev_hum = hum
+    return timestamps, temperatures, humidities
+
+
+# MAIN
+
+timestamps, temperatures, humidities = read_data(default_data_file)
 
 plt.ion()
 
 fig, ax = plt.subplots()
+
+days = dates.DayLocator(interval=1)
+daysFmt = dates.DateFormatter('%Y-%m-%d')
 
 ax.xaxis.set_major_locator(days)
 ax.xaxis.set_major_formatter(daysFmt)

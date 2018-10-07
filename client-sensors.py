@@ -37,7 +37,7 @@ def process(sensor, led_pin, options, identifier):
     if (t > -10) and (h > 0):
         signal_blinks(led_pin, 3, 0.5)
     else:
-        signal_blinks(led_pin, 5, 0.3)
+        signal_blinks(led_pin, 10, 0.2)
     return t, h, epoch, iso_time
 
 
@@ -56,7 +56,9 @@ def log(temperature, humidity, epoch, iso_time, options, led_pin, log_url,
         print(response.status_code)
         print(response.text)
 
-    if response.status_code != 200:
+    if response.status_code == 200:
+        signal_blinks(led_pin, 6, 0.5)
+    else:
         signal_blinks(led_pin, 20, 0.2)
     return
 
