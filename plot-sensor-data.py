@@ -190,7 +190,9 @@ if not options.visual:
 import matplotlib.pyplot as plt
 from matplotlib import dates
 
-mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
+# mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
+# honeydew uses python 3.5: no timespec
+mail_log = ['Now = %s' % datetime.datetime.now().isoformat()]
 
 f0, f1 = read_and_plot(options)
 
