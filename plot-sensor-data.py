@@ -83,8 +83,11 @@ def daily_data(data_to_use, max_days=None):
     for timestamp, (temp, hum) in data_to_use.items():
         if timestamp >= min_timestamp:
             rounded_timestamp = round_down_date(timestamp)
+            print(timestamp, rounded_timestamp)
             daily_temperatures[rounded_timestamp].append(temp)
             daily_humidities[rounded_timestamp].append(hum)
+        else:
+            print(timestamp, 'X')
     timestamps = []
     temp_max = []
     temp_min = []
