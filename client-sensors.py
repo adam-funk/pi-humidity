@@ -88,6 +88,5 @@ with open(options.config_file) as f:
 for entry in config['sensors']:
     sensor = DHT22.sensor(pi, entry['sensor_pin'])
     led_pin = entry['led_pin']
-    identifier = entry['identifier']
     t, h, epoch, iso_time = process(sensor, led_pin, options)
-    log(t, h, epoch, iso_time, options, led_pin, config['url'], identifier, config['local_file'])
+    log(t, h, epoch, iso_time, options, led_pin, config['url'], entry['identifier'], config['local_file'])
