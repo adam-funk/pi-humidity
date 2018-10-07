@@ -1,0 +1,22 @@
+TODO
+
+Client:
+
+On each pass, write to sqlite DB.
+Columns:
+epoch, iso_time, identifier, temperature, humidity, transmitted=false
+
+Then query DB for transmitted=false; try to transmit each one and
+update DB.
+
+
+Server:
+Use a config file for everything.
+Run without screen or terminal.
+
+Config:
+ - data file
+ - log file
+
+Start from cron @reboot?
+Maybe with a script with some delay at the beginning.
