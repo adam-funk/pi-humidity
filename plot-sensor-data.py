@@ -18,7 +18,6 @@ import numpy
 # https://matplotlib.org/tutorials/introductory/pyplot.html
 
 default_data_file = '/home/adam/home-data.tsv'
-default_output_dir = '/tmp/sensor-plots-%i' % int(time.time())
 
 
 def round_down_date(timestamp):
@@ -106,9 +105,10 @@ def daily_data(data_to_use, max_days=None):
 
 # MAIN
 def read_and_plot(options):
-    os.mkdir(default_output_dir)
-    f0 = os.path.join(default_output_dir, '7_days_smoothed.png')
-    f1 = os.path.join(default_output_dir, '12_days_ranged.png')
+    output_dir = '/tmp/sensor-plots-%i' % int(time.time())
+    os.mkdir(output_dir)
+    f0 = os.path.join(output_dir, '7_days_smoothed.png')
+    f1 = os.path.join(output_dir, '12_days_ranged.png')
 
     general_data = read_raw_data(options.data_file)
 
