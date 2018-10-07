@@ -4,6 +4,7 @@ import argparse
 import datetime
 import imghdr
 import os
+import platform
 import smtplib
 import time
 from collections import defaultdict
@@ -204,7 +205,10 @@ from matplotlib import dates
 
 # mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
 # honeydew uses python 3.5: no timespec
-mail_log = ['Now = %s' % datetime.datetime.now().isoformat()]
+
+basic_message = 'Now = %s\nTransmitter = %s' % (datetime.datetime.now().isoformat(),
+                                                platform.node())
+mail_log = []
 
 f0, f1 = read_and_plot(options)
 
@@ -215,14 +219,19 @@ if options.mail:
     mail['From'] = 'potsmaster@ducksburg.com'
     mail['Subject'] = 'temperature & humidity'
 
+    mail.add_attachment(basic_message.encode('utf-8'),
+                        maintype='text', subtype='plain')
+
     # https://docs.python.org/3/library/email.examples.html
-    mail.add_attachment('\n'.join(mail_log).encode('utf-8'), maintype='text',
-                        subtype='plain')
     for file in [f0, f1]:
         with open(file, 'rb') as fp:
             img_data = fp.read()
         mail.add_attachment(img_data, maintype='image',
                             subtype=imghdr.what(None, img_data))
+
+    mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
+                        maintype='text', subtype='plain')
+
     with smtplib.SMTP('localhost') as s:
         s.send_message(mail)
 
