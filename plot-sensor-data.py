@@ -1,11 +1,23 @@
+import argparse
+import imghdr
+import os
+import email
+import smtplib
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import numpy
-import datetime
+import datetime, time
 from matplotlib import dates
 
+# https://matplotlib.org/gallery/text_labels_and_annotations/date.html
+# https://matplotlib.org/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots
+# https://matplotlib.org/api/dates_api.html#matplotlib.dates.MonthLocator
+# https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
+# https://matplotlib.org/tutorials/introductory/pyplot.html
+
 default_data_file = '/home/adam/home-data.tsv'
+default_output_dir = '/tmp/sensor-plots-%i' % int(time.time())
 
 
 def round_down_date(timestamp):
@@ -15,6 +27,8 @@ def round_down_date(timestamp):
 
 
 def read_raw_data(data_file):
+    # TODO filter by identifer (col 2)
+    global mail_log
     # time -> (temp, hum)
     data_to_use = dict()
     # collect all the valid data from the file
@@ -27,8 +41,7 @@ def read_raw_data(data_file):
             if (-10 < temp < 150) and (-1 < hum < 101):
                 data_to_use[epoch] = (temp, hum)
             else:
-                # TODO log this and add to e-mail body
-                print("Rejected", epoch, temp, hum)
+                mail_log.append("Rejected %i %s %f %f" % (epoch, line_data[1], temp, hum))
     return data_to_use
 
 
@@ -43,15 +56,16 @@ def average_data(data_to_use):
     prev_hum = data_to_use[prev_epoch][1]
     # Use average of each pair of adjacent measurements
     for epoch in raw_times[1:]:
-        timestamps.append(numpy.datetime64((prev_epoch + epoch)//2, 's'))
+        timestamps.append(numpy.datetime64((prev_epoch + epoch) // 2, 's'))
         temp = data_to_use[epoch][0]
         hum = data_to_use[epoch][1]
-        temperatures.append((prev_temp + temp)/2)
-        humidities.append((prev_hum + hum)/2)
+        temperatures.append((prev_temp + temp) / 2)
+        humidities.append((prev_hum + hum) / 2)
         prev_epoch = epoch
         prev_temp = temp
         prev_hum = hum
     return timestamps, temperatures, humidities
+
 
 def daily_data(data_to_use):
     daily_temperatures = defaultdict(list)
@@ -79,43 +93,89 @@ def daily_data(data_to_use):
 
 
 # MAIN
+def read_and_plot(options):
+    os.mkdir(default_output_dir)
+    f0 = os.path.join(default_output_dir, 'time.png')
+    f1 = os.path.join(default_output_dir, 'date.png')
 
-general_data = read_raw_data(default_data_file)
-all_timestamps, all_temperatures, all_humidities = average_data(general_data)
+    general_data = read_raw_data(options.data_file)
+    all_timestamps, all_temperatures, all_humidities = average_data(general_data)
 
-plt.ion()
+    # https://stackoverflow.com/questions/15713279/calling-pylab-savefig-without-display-in-ipython
+    if options.visual:
+        plt.ion()
+    else:
+        plt.ioff()
 
-fig, ax = plt.subplots()
+    days = dates.DayLocator(interval=1)
+    days_format = dates.DateFormatter('%Y-%m-%d')
 
-days = dates.DayLocator(interval=1)
-daysFmt = dates.DateFormatter('%Y-%m-%d')
+    fig0, ax0 = plt.subplots()
+    ax0.xaxis.set_major_locator(days)
+    ax0.xaxis.set_major_formatter(days_format)
+    ax0.format_xdata = days_format
+    ax0.plot(all_timestamps, all_temperatures, 'b,-',
+             all_timestamps, all_humidities, 'g,-')
+    # autofmt needs to happen after data
+    fig0.autofmt_xdate(rotation=60)
+    plt.savefig(f0, dpi=200)
 
-ax.xaxis.set_major_locator(days)
-ax.xaxis.set_major_formatter(daysFmt)
-ax.format_xdata = daysFmt
+    datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data)
 
-fig.autofmt_xdate()
+    fig1, ax1 = plt.subplots()
+    ax1.xaxis.set_major_locator(days)
+    ax1.xaxis.set_major_formatter(days_format)
+    ax1.format_xdata = days_format
+    ax1.plot(datestamps, tmin, 'b-',
+             datestamps, tmean, 'b-',
+             datestamps, tmax, 'b-',
+             datestamps, hmin, 'g-',
+             datestamps, hmean, 'g-',
+             datestamps, hmax, 'g-'
+             )
+    fig1.autofmt_xdate(rotation=60)
+    plt.savefig(f1, dpi=200)
 
-ax.plot(all_timestamps, all_temperatures, 'b,-',
-        all_timestamps, all_humidities, 'g,-')
-
-datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data)
-
-ax.plot(datestamps, tmin, 'b-',
-        datestamps, tmean, 'b-',
-        datestamps, tmax, 'b-',
-        datestamps, hmin, 'g-',
-        datestamps, hmean, 'g-',
-        datestamps, hmax, 'g-'
-        )
+    return f0, f1
 
 
-# https://matplotlib.org/gallery/text_labels_and_annotations/date.html
-# https://matplotlib.org/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots
-# https://matplotlib.org/api/dates_api.html#matplotlib.dates.MonthLocator
-# https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
-# https://matplotlib.org/tutorials/introductory/pyplot.html
+oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
+                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-# TODO
-# max mean min for each day
-# convert epoch to datetime then take ymd only
+oparser.add_argument("-d", dest="data_source",
+                     default=default_data_file,
+                     metavar="TSV",
+                     help="TSV input file")
+
+oparser.add_argument("-v", dest="visual",
+                     default=False,
+                     action='store_true',
+                     help="show plots")
+
+oparser.add_argument("-m", dest="mail",
+                     default=None,
+                     type=str,
+                     metavar='user@example.com',
+                     help="send mail to this address")
+
+options = oparser.parse_args()
+
+mail_log = []
+
+f0, f1 = read_and_plot(options)
+
+if options.mail:
+    mail = email.message.Message()
+    mail.set_charset('utf-8')
+    mail['To'] = options.mail
+    mail['From'] = 'potsmaster@ducksburg.com'
+    mail['Subject'] = 'temperature & humidity'
+    mail.preamble = '\n'.join(mail_log)
+    # https://docs.python.org/3/library/email.examples.html
+    for file in [f0, f1]:
+        with open(file, 'rb') as fp:
+            img_data = fp.read()
+        mail.add_attachment(img_data, maintype='image',
+                            subtype=imghdr.what(None, img_data))
+    with smtplib.SMTP('localhost') as s:
+        s.send_message(mail)
