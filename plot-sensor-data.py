@@ -205,8 +205,8 @@ from matplotlib import dates
 # mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
 # honeydew uses python 3.5: no timespec
 
-basic_message = 'Now = %s\nTransmitter = %s' % (datetime.datetime.now().isoformat(),
-                                                platform.node())
+basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
+                                           platform.node())
 mail_log = []
 
 f0, f1 = read_and_plot(options)
