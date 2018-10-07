@@ -8,5 +8,6 @@
     }
   ],
   "url": "http://192.168.123.7:8089/data",
+  "database": "/home/pi/cellar.sqlite",
   "local_file": "/home/pi/cellar.tsv"
 }
