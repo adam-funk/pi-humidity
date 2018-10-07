@@ -189,8 +189,7 @@ oparser.add_argument("-D", dest="debug_days",
                      help="debug day ranging")
 
 oparser.add_argument("-m", dest="mail",
-                     default=None,
-                     type=str,
+                     action='append',
                      metavar='USER@EXAMPLE.COM',
                      help="send mail to this address")
 
@@ -215,7 +214,7 @@ f0, f1 = read_and_plot(options)
 if options.mail:
     mail = EmailMessage()
     mail.set_charset('utf-8')
-    mail['To'] = options.mail
+    mail['To'] = ', '.join(options.mail)
     mail['From'] = 'potsmaster@ducksburg.com'
     mail['Subject'] = 'temperature & humidity'
 
