@@ -95,7 +95,7 @@ def daily_data(data_to_use, max_days=None):
     hum_max = []
     hum_min = []
     hum_mean = []
-    for timestamp in daily_humidities.keys():
+    for timestamp in sorted(daily_humidities.keys()):
         timestamps.append(numpy.datetime64(timestamp, 's'))
         temp_min.append(min(daily_temperatures[timestamp]))
         temp_mean.append(numpy.mean(daily_temperatures[timestamp]))
