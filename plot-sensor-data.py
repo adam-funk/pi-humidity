@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 
 import argparse
+import datetime
+import email
 import imghdr
 import os
-import email
 import smtplib
+import time
 from collections import defaultdict
+from email.message import EmailMessage
 
 import matplotlib.pyplot as plt
 import numpy
-import datetime, time
 from matplotlib import dates
 
 # https://matplotlib.org/gallery/text_labels_and_annotations/date.html
@@ -144,7 +146,7 @@ def read_and_plot(options):
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-oparser.add_argument("-d", dest="data_source",
+oparser.add_argument("-d", dest="data_file",
                      default=default_data_file,
                      metavar="TSV",
                      help="TSV input file")
@@ -157,7 +159,7 @@ oparser.add_argument("-v", dest="visual",
 oparser.add_argument("-m", dest="mail",
                      default=None,
                      type=str,
-                     metavar='user@example.com',
+                     metavar='USER@EXAMPLE.COM',
                      help="send mail to this address")
 
 options = oparser.parse_args()
@@ -167,7 +169,7 @@ mail_log = []
 f0, f1 = read_and_plot(options)
 
 if options.mail:
-    mail = email.message.Message()
+    mail = EmailMessage()
     mail.set_charset('utf-8')
     mail['To'] = options.mail
     mail['From'] = 'potsmaster@ducksburg.com'
