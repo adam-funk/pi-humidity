@@ -9,14 +9,19 @@ epoch, iso_time, identifier, temperature, humidity, transmitted=false
 Then query DB for transmitted=false; try to transmit each one and
 update DB.
 
-
+*****
 Server:
-Use a config file for everything.
 Run without screen or terminal.
+Silent mode.
 
 Config:
  - data file
  - log file
+ - server port
 
 Start from cron @reboot?
 Maybe with a script with some delay at the beginning.
+
+*****
+Plotter:
+- separate by identifier
