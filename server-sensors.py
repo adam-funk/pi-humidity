@@ -6,7 +6,7 @@ import time
 
 data_file = '/home/adam/sensors-data.tsv'
 
-pid_filename = 'sensors-server-%d.pid' % time.time()
+pid_filename = '/tmp/sensors-server-%d.pid' % time.time()
 
 log_filename = '/home/adam/sensors-server.log'
 
