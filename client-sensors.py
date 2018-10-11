@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 import json
+import random
 
-import DHT22
 import argparse
 import datetime
-import pigpio
 import requests
 import time
 
@@ -38,6 +37,15 @@ def process(sensor, led_pin, options, identifier):
         signal_blinks(led_pin, 3, 0.5)
     else:
         signal_blinks(led_pin, 10, 0.2)
+    return t, h, epoch, iso_time
+
+
+def dummy_values():
+    now = datetime.datetime.now()
+    epoch = int(time.time())
+    iso_time = datetime.datetime.isoformat(now).split('.')[0]
+    t = round(random.randint(150, 210) / 10, 1)
+    h = round(random.randint(60, 85) / 10)
     return t, h, epoch, iso_time
 
 
@@ -76,13 +84,23 @@ oparser.add_argument("-c", dest="config_file",
 
 options = oparser.parse_args()
 
-pi = pigpio.pi()
-
 with open(options.config_file) as f:
     config = json.load(f)
 
+# missing is the same as false
+dummy = ('dummy' in config) and config['dummy']
+
+if not dummy:
+    import pigpio
+    import DHT22
+    pi = pigpio.pi()
+
 for entry in config['sensors']:
-    sensor = DHT22.sensor(pi, entry['sensor_pin'])
-    led_pin = entry['led_pin']
-    t, h, epoch, iso_time = process(sensor, led_pin, options, entry['identifier'])
+    if dummy:
+        t, h, epoch, iso_time = dummy_values()
+    else:
+        sensor = DHT22.sensor(pi, entry['sensor_pin'])
+        led_pin = entry['led_pin']
+        t, h, epoch, iso_time = process(sensor, led_pin, options, entry['identifier'])
+
     log(t, h, epoch, iso_time, options, led_pin, config['url'], entry['identifier'], config['local_file'])
