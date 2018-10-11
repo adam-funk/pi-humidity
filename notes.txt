@@ -10,18 +10,15 @@ Then query DB for transmitted=false; try to transmit each one and
 update DB.
 
 *****
-Server:
-Run without screen or terminal.
-Silent mode.
-
-Config:
+Server config:
  - data file
  - log file
  - server port
 
-Start from cron @reboot?
-Maybe with a script with some delay at the beginning.
-
 *****
 Plotter:
 - separate by identifier
+
+*****
+DONE
+Use bottledaemon; start from cron @reboot.

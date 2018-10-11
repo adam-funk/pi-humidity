@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-from bottle import run, post, request
-from bottledaemon import daemon_run
 import time
+
+from bottle import post, request
+from bottledaemon import daemon_run
 
 data_file = '/home/adam/sensors-data.tsv'
 
 pid_filename = '/tmp/sensors-server-%d.pid' % time.time()
 
 log_filename = '/home/adam/sensors-server.log'
+
 
 @post('/data')
 def take_data():
@@ -23,5 +25,4 @@ def take_data():
 
 
 # 0.0.0.0 makes it available on the LAN
-# run(host='0.0.0.0', port=8089, debug=True)
 daemon_run(host='0.0.0.0', port=8089, pidfile=pid_filename, logfile=log_filename)
