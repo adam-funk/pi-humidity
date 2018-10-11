@@ -18,7 +18,7 @@ import numpy
 # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
 # https://matplotlib.org/tutorials/introductory/pyplot.html
 
-default_data_file = '/home/adam/home-data.tsv'
+default_data_file = '/home/adam/sensors-data.tsv'
 
 
 def round_down_date(timestamp):
