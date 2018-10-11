@@ -1,0 +1,14 @@
+{
+  "sensors":
+  [
+    {
+      "led_pin": 24,
+      "sensor_pin": 23,
+      "identifier": "dummy"
+    }
+  ],
+  "dummy": true,
+  "url": "http://192.168.123.99:8089/data",
+  "database": "/home/adam/dummy.sqlite",
+  "local_file": "/home/adam/dummy.tsv"
+}
