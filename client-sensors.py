@@ -52,7 +52,7 @@ def dummy_values():
 def log(temperature, humidity, epoch, iso_time, options, led_pin, log_url,
         identifier, local_file):
     with open(local_file, 'a') as f:
-        f.write('%d\t%s\t%f\t%f\n' % (epoch, iso_time, temperature, humidity))
+        f.write('%d\t%s\t%s\t%.1f\t%.f\n' % (epoch, iso_time, identifier, temperature, humidity))
     response = requests.post(log_url,
                              json={'id': identifier,
                                    'temperature': temperature,
