@@ -15,6 +15,13 @@ Server config:
  - log file
  - server port
 
+Run server and plot-mailer on another account with $HOME available at boot.
+
+crontab @reboot sensor-server.py start
+
+cron.daily or similar after texpire (oom-killer)
+  restart
+
 *****
 Plotter:
 - separate by identifier
