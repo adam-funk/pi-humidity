@@ -33,7 +33,7 @@ def get_data(sensor, led_pin, pi):
     if (t > -10) and (h > 0):
         signal_blinks(led_pin, 3, 0.5, pi)
     else:
-        signal_blinks(led_pin, 10, 0.2, pi)
+        signal_blinks(led_pin, 9, 0.2, pi)
     return {'epoch': epoch, 'temperature': t, 'humidity': h,
             'date_time': iso_time, 'led_pin': led_pin}
 
@@ -63,7 +63,7 @@ def post_data(data_chunk, log_url, pi):
     if success:
         signal_blinks(led_pin, 6, 0.5, pi)
     else:
-        signal_blinks(led_pin, 20, 0.2, pi)
+        signal_blinks(led_pin, 15, 0.2, pi)
     return success
 
 
