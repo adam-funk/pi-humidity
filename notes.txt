@@ -1,18 +1,5 @@
 TODO
 
-Client:
-
-On each pass, add to local tinydb.
-
-Then query DB; for each item, try to transmit it and
-delete on success.
-
-*****
-Server config:
- - data file
- - log file
- - server port
-
 Run server and plot-mailer on another account with $HOME available at boot.
 
 crontab @reboot sensor-server.py start
@@ -23,4 +10,4 @@ cron.daily or similar after texpire (oom-killer)
 *****
 Plotter:
 - separate by identifier
-
+- using server.json to find data file

@@ -1,5 +1,5 @@
 {
   "port": 8089,
   "directory": "/home/fozzie/home-data",
-  "data_file": "sensors-data.tsv",
+  "data_file": "sensors-data.tsv"
 }
