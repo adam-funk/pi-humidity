@@ -75,7 +75,7 @@ def main(options):
 
     # Try to post each item in the database
     for data_chunk in iter(database):
-        post_data(data_chunk, config['log_url'], pi)
+        post_data(data_chunk, config['url'], pi)
         database.remove(doc_ids=[data_chunk.doc_id])
 
     if not options.quiet:
