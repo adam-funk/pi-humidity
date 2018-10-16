@@ -43,7 +43,7 @@ def process(sensor, led_pin, options, identifier):
     epoch = int(time.time())
     iso_time = datetime.datetime.isoformat(now).split('.')[0]
     t = round(sensor.temperature(), 1)
-    h = round(sensor.humidity())
+    h = round(sensor.humidity())  # this returns int
     if not options.quiet:
         print(t, h, iso_time)
     if (t > -10) and (h > 0):
