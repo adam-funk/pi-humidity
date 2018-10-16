@@ -8,7 +8,7 @@ from bottledaemon import daemon_run
 
 data_file = '/home/adam/sensors-data.tsv'
 
-pid_filename = '/tmp/sensors-server-%d.pid' % time.time()
+pid_filename = '/tmp/sensors-server.pid'
 
 # log file name includes timestamp to prevent clobbering
 log_filename = '/home/adam/sensors-server-%d.log' % round(time.time())
@@ -17,9 +17,9 @@ log_filename = '/home/adam/sensors-server-%d.log' % round(time.time())
 @post('/data')
 def take_data():
     j = request.json
-    # print the ISO time (just to the second)
+    # Log the ISO time (just to the second), then the data.
     print(maya.now().iso8601().split('.')[0])
-    print(j) # to the log?
+    print(j)
 
     with open(data_file, 'a') as f:
         line = '%s\t%s\t%s\t%s\t%s\n' % (j['epoch'], j['date_time'],
