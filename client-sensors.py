@@ -46,16 +46,23 @@ def record_locally(data_chunk, local_file, database):
 
 
 def post_data(data_chunk, log_url, pi):
-    response = requests.post(log_url, json=data_chunk)
-    if not options.quiet:
-        print(response.status_code)
-        print(response.text)
+    success = False
     led_pin = data_chunk['led_pin']
-    if response.status_code == 200:
+    try:
+        response = requests.post(log_url, json=data_chunk)
+        if not options.quiet:
+            print(response.status_code)
+            print(response.text)
+        if response.status_code == 200:
+            success = True
+    except ConnectionError as e:
+        if not options.quiet:
+            print(str(e))
+    if success:
         signal_blinks(led_pin, 6, 0.5, pi)
-        return True
-    signal_blinks(led_pin, 20, 0.2, pi)
-    return False
+    else:
+        signal_blinks(led_pin, 20, 0.2, pi)
+    return success
 
 
 def main(options):
