@@ -29,7 +29,7 @@ def get_data(sensor, led_pin, pi):
     t = round(sensor.temperature(), 1)
     h = round(sensor.humidity())  # this returns int
     if not options.quiet:
-        print(t, h, iso_time)
+        print('Measurement:', iso_time, t, h)
     if (t > -10) and (h > 0):
         signal_blinks(led_pin, 3, 0.5, pi)
     else:
@@ -48,6 +48,8 @@ def record_locally(data_chunk, local_file, database):
 def post_data(data_chunk, log_url, pi):
     success = False
     led_pin = data_chunk['led_pin']
+    if not options.quiet:
+        print('Posting:', data_chunk['date_time'])
     try:
         response = requests.post(log_url, json=data_chunk)
         if not options.quiet:
@@ -80,12 +82,14 @@ def main(options):
         data_chunk['identifier'] = entry['identifier']
         record_locally(data_chunk, tsv, database)
 
-    # Try to post each item in the database
-    # TODO: don't keep firing after one fails
+    # Try to post each item in the database but quit trying
+    # after one fails.  Delete each one when successful.
+    # The database contains only unPOSTed data.
     for data_chunk in iter(database):
         if post_data(data_chunk, config['url'], pi):
             database.remove(doc_ids=[data_chunk.doc_id])
-        # If it fails, leave it in the DB for next run.
+        else:
+            break
 
     if not options.quiet:
         print('Outstanding data', len(database))
