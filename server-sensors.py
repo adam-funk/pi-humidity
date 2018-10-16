@@ -9,6 +9,7 @@ data_file = '/home/adam/sensors-data.tsv'
 
 pid_filename = '/tmp/sensors-server-%d.pid' % time.time()
 
+# TODO add timestamp to log file name to avoid clobbering
 log_filename = '/home/adam/sensors-server.log'
 
 
