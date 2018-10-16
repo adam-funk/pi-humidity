@@ -23,7 +23,7 @@ def take_data():
 
     with open(data_file, 'a') as f:
         line = '%s\t%s\t%s\t%s\t%s\n' % (j['epoch'], j['date_time'],
-                                         j['id'], j['temperature'], j['humidity'])
+                                         j['identifier'], j['temperature'], j['humidity'])
         f.write(line)
     return 'OK'
 
