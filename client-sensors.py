@@ -3,7 +3,7 @@ import argparse
 import datetime
 import json
 import os
-import sqlite3
+# TODO use tinyDB
 import time
 
 import pigpio
@@ -26,24 +26,6 @@ def signal_blinks(led_pin, nbr_blinks, pause):
         pi.write(led_pin, 0)
         time.sleep(pause)
     return
-
-
-def get_or_create_database(options, config):
-    database_file = config['database']
-    if os.path.exists(database_file):
-        if not options.quiet:
-            print("Connnecting to", database_file)
-        return sqlite3.connect(database_file)
-    # create it
-    if not options.quiet:
-        print("Creating", database_file)
-    connection = sqlite3.connect(database_file)
-    cursor = connection.cursor()
-    cursor.execute('CREATE TABLE data ( key INTEGER PRIMARY KEY, '
-                   'epoch INTEGER, isotime TEXT, identifier TEXT, temp REAL, hum REAL, '
-                   'uploaded INTEGER )')
-    connection.commit()
-    return connection
 
 
 def record_data(options, connection, epoch, iso, temp, hum, identifier):
@@ -110,9 +92,6 @@ with open(options.config_file) as f:
     config = json.load(f)
 
 pi = pigpio.pi()
-
-
-
 
 for entry in config['sensors']:
     sensor = DHT22.sensor(pi, entry['sensor_pin'])
