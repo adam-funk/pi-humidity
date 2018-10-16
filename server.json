@@ -1,5 +1,5 @@
 {
   "port": 8089,
-  "log_file": "/home/adam/sensors-server.log",
-  "data_file": "/home/adam/sensors-data.tsv",
+  "directory": "/home/fozzie/home-data",
+  "data_file": "sensors-data.tsv",
 }
