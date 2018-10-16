@@ -55,7 +55,7 @@ def post_data(data_chunk, log_url, pi):
             print(response.text)
         if response.status_code == 200:
             success = True
-    except ConnectionError as e:
+    except Exception as e:
         if not options.quiet:
             print(str(e))
     if success:
@@ -81,6 +81,7 @@ def main(options):
         record_locally(data_chunk, tsv, database)
 
     # Try to post each item in the database
+    # TODO: don't keep firing after one fails
     for data_chunk in iter(database):
         if post_data(data_chunk, config['url'], pi):
             database.remove(doc_ids=[data_chunk.doc_id])
