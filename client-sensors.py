@@ -62,7 +62,7 @@ def main(options):
     with open(options.config_file) as f:
         config = json.load(f)
     pi = pigpio.pi()
-    database = tinydb.TinyDB(options['database'])
+    database = tinydb.TinyDB(config['database'])
     tsv = config['local_file']
 
     # Check each sensor and write results to the database.
