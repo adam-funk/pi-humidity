@@ -2,12 +2,10 @@ TODO
 
 Client:
 
-On each pass, write to sqlite DB.
-Columns:
-epoch, iso_time, identifier, temperature, humidity, transmitted=false
+On each pass, add to local tinydb.
 
-Then query DB for transmitted=false; try to transmit each one and
-update DB.
+Then query DB; for each item, try to transmit it and
+delete on success.
 
 *****
 Server config:
@@ -26,6 +24,3 @@ cron.daily or similar after texpire (oom-killer)
 Plotter:
 - separate by identifier
 
-*****
-DONE
-Use bottledaemon; start from cron @reboot.
