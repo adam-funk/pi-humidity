@@ -75,8 +75,9 @@ def main(options):
 
     # Try to post each item in the database
     for data_chunk in iter(database):
-        post_data(data_chunk, config['url'], pi)
-        database.remove(doc_ids=[data_chunk.doc_id])
+        if post_data(data_chunk, config['url'], pi):
+            database.remove(doc_ids=[data_chunk.doc_id])
+        # If it fails, leave it in the DB for next run.
 
     if not options.quiet:
         print('Outstanding data', len(database))
