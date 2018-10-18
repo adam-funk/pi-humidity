@@ -2,7 +2,6 @@
 
 import json
 import os
-import time
 
 import maya
 from bottle import post, request
@@ -34,7 +33,7 @@ data_filename = os.path.join(directory, config['data_file'])
 pid_filename = '/tmp/sensors-server.pid'
 
 # log file name includes timestamp to prevent clobbering
-log_filename = os.path.join(directory, 'sensors-server-%d.log' % round(time.time()))
+log_filename = os.path.join(directory, 'sensors-server-%s.log' % maya.now().iso8601().split('.')[0])
 
 # 0.0.0.0 makes it available on the LAN
 daemon_run(host='0.0.0.0', port=config['port'],
