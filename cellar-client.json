@@ -9,5 +9,6 @@
   ],
   "url": "http://192.168.123.7:8089/data",
   "database": "/home/pi/cellar.json",
-  "local_file": "/home/pi/cellar.tsv"
+  "local_file": "/home/pi/cellar.tsv",
+  "time_limit": 195
 }

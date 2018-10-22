@@ -67,12 +67,17 @@ def post_data(data_chunk, log_url, pi):
     return success
 
 
-def main(options):
+def main(options, start_time):
     with open(options.config_file) as f:
         config = json.load(f)
     pi = pigpio.pi()
     database = tinydb.TinyDB(config['database'])
     tsv = config['local_file']
+
+    if config.get('time_limit'):
+        cutoff_time = start_time + config['time_limit']
+    else:
+        cutoff_time = None
 
     # Check each sensor and write results to the database.
     for entry in config['sensors']:
@@ -83,10 +88,15 @@ def main(options):
         record_locally(data_chunk, tsv, database)
 
     # Try to post each item in the database but quit trying
-    # after one fails.  Delete each one when successful.
+    # after one fails or when the time limit is reached.
+    # Delete each one when successful.
     # The database contains only unPOSTed data.
     for data_chunk in iter(database):
-        if post_data(data_chunk, config['url'], pi):
+        if cutoff_time and (time.time() > cutoff_time):
+            if not options.quiet:
+                print('Cutoff time reached')
+            break
+        elif post_data(data_chunk, config['url'], pi):
             database.remove(doc_ids=[data_chunk.doc_id])
         else:
             break
@@ -109,4 +119,4 @@ oparser.add_argument("-c", dest="config_file",
 
 options = oparser.parse_args()
 
-main(options)
+main(options, int(time.time()))
