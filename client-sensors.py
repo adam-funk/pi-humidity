@@ -40,7 +40,7 @@ def get_data(sensor, led_pin, pi):
 
 def record_locally(data_chunk, local_file, database):
     with open(local_file, 'a') as f:
-        f.write('{epoch}\t{date_time}\t{identifier}\ttemperature\thumidity\n'.format_map(data_chunk))
+        f.write('{epoch}\t{date_time}\t{identifier}\t{temperature}\t{humidity}\n'.format_map(data_chunk))
     database.insert(data_chunk)
     return
 
