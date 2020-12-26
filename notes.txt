@@ -11,3 +11,7 @@ cron.daily or similar after texpire (oom-killer)
 Plotter:
 - separate by identifier
 - using server.json to find data file
+
+DHT22.py source:
+
+https://github.com/joan2937/pigpio/blob/master/EXAMPLES/Python/DHT22_AM2302_SENSOR/DHT22.py

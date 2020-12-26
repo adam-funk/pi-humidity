@@ -244,16 +244,19 @@ if options.mail:
     mail['Subject'] = 'temperature & humidity'
 
     mail.add_attachment(basic_message.encode('utf-8'),
+                        disposition='inline',
                         maintype='text', subtype='plain')
-
+    
     # https://docs.python.org/3/library/email.examples.html
     for file in plot_files:
         with open(file, 'rb') as fp:
             img_data = fp.read()
         mail.add_attachment(img_data, maintype='image',
+                        disposition='inline',
                             subtype=imghdr.what(None, img_data))
 
     mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
+                        disposition='inline',
                         maintype='text', subtype='plain')
 
     with smtplib.SMTP('localhost') as s:
