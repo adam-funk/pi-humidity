@@ -127,7 +127,7 @@ def read_and_plot(options):
     days_format = dates.DateFormatter('%d')
 
     # smoothed plot
-    all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=8)
+    all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=7)
 
     fig0, ax0 = plt.subplots(figsize=(7,3))
     ax0.xaxis.set_major_locator(days_minor)
