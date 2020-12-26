@@ -123,12 +123,13 @@ def read_and_plot(options):
 
     days = dates.DayLocator(interval=1)
     days_minor = dates.DayLocator(interval=2)
-    days_format = dates.DateFormatter('%Y-%m-%d')
+    #days_format = dates.DateFormatter('%Y-%m-%d')
+    days_format = dates.DateFormatter('%d')
 
     # smoothed plot
     all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=8)
 
-    fig0, ax0 = plt.subplots()
+    fig0, ax0 = plt.subplots(figsize=(7,3))
     ax0.xaxis.set_major_locator(days_minor)
     ax0.xaxis.set_major_formatter(days_format)
     ax0.xaxis.set_minor_locator(days)
@@ -141,7 +142,7 @@ def read_and_plot(options):
     if not options.visual:
         plt.close(fig0)
 
-    fig1, ax1= plt.subplots()
+    fig1, ax1= plt.subplots(figsize=(7,3))
     ax1.xaxis.set_major_locator(days_minor)
     ax1.xaxis.set_major_formatter(days_format)
     ax1.xaxis.set_minor_locator(days)
@@ -162,7 +163,7 @@ def read_and_plot(options):
         for stuff in zip(datestamps, tmin, tmean, tmax, hmin, hmean, hmax):
             mail_log.append(' '.join([str(x) for x in stuff]))
 
-    fig2, ax2 = plt.subplots()
+    fig2, ax2 = plt.subplots(figsize=(7,3))
     ax2.xaxis.set_major_locator(days_minor)
     ax2.xaxis.set_major_formatter(days_format)
     ax2.xaxis.set_minor_locator(days)
@@ -177,7 +178,7 @@ def read_and_plot(options):
     if not options.visual:
         plt.close(fig2)
 
-    fig3, ax2 = plt.subplots()
+    fig3, ax2 = plt.subplots(figsize=(7,3))
     ax2.xaxis.set_major_locator(days_minor)
     ax2.xaxis.set_major_formatter(days_format)
     ax2.xaxis.set_minor_locator(days)
