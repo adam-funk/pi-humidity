@@ -108,8 +108,10 @@ def daily_data(data_to_use, max_days=None):
 def read_and_plot(options):
     output_dir = '/tmp/sensor-plots-%i' % int(time.time())
     os.mkdir(output_dir)
-    f0 = os.path.join(output_dir, '7_days_smoothed.png')
-    f1 = os.path.join(output_dir, '12_days_ranged.png')
+    f0 = os.path.join(output_dir, 'tem_7_days_smoothed.png')
+    f1 = os.path.join(output_dir, 'hum_7_days_smoothed.png')
+    f2 = os.path.join(output_dir, 'tem_12_days_ranged.png')
+    f3 = os.path.join(output_dir, 'hum_12_days_ranged.png')
 
     general_data = read_raw_data(options.data_file)
 
@@ -132,14 +134,25 @@ def read_and_plot(options):
     ax0.xaxis.set_minor_locator(days)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
-    ax0.plot(all_timestamps, all_temperatures, 'b,-',
-             all_timestamps, all_humidities, 'g,-')
+    ax0.plot(all_timestamps, all_temperatures, 'b,-')
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
     plt.savefig(f0, dpi=200)
     if not options.visual:
         plt.close(fig0)
 
+    fig1, ax1= plt.subplots()
+    ax1.xaxis.set_major_locator(days_minor)
+    ax1.xaxis.set_major_formatter(days_format)
+    ax1.xaxis.set_minor_locator(days)
+    ax1.format_xdata = days_format
+    ax1.grid(True, which='both')
+    ax1.plot(all_timestamps, all_humidities, 'g,-')
+    # autofmt needs to happen after data
+    fig1.autofmt_xdate(rotation=60)
+    plt.savefig(f1, dpi=200)
+    if not options.visual:
+        plt.close(fig1)
 
     # ranged plot
     datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data, max_days=20)
@@ -149,25 +162,37 @@ def read_and_plot(options):
         for stuff in zip(datestamps, tmin, tmean, tmax, hmin, hmean, hmax):
             mail_log.append(' '.join([str(x) for x in stuff]))
 
-    fig1, ax1 = plt.subplots()
-    ax1.xaxis.set_major_locator(days_minor)
-    ax1.xaxis.set_major_formatter(days_format)
-    ax1.xaxis.set_minor_locator(days)
-    ax1.format_xdata = days_format
-    ax1.grid(True, which='both')
-    ax1.plot(datestamps, tmin, 'b-',
+    fig2, ax2 = plt.subplots()
+    ax2.xaxis.set_major_locator(days_minor)
+    ax2.xaxis.set_major_formatter(days_format)
+    ax2.xaxis.set_minor_locator(days)
+    ax2.format_xdata = days_format
+    ax2.grid(True, which='both')
+    ax2.plot(datestamps, tmin, 'b-',
              datestamps, tmean, 'b-',
              datestamps, tmax, 'b-',
-             datestamps, hmin, 'g-',
+             )
+    fig2.autofmt_xdate(rotation=60)
+    plt.savefig(f2, dpi=200)
+    if not options.visual:
+        plt.close(fig2)
+
+    fig3, ax2 = plt.subplots()
+    ax2.xaxis.set_major_locator(days_minor)
+    ax2.xaxis.set_major_formatter(days_format)
+    ax2.xaxis.set_minor_locator(days)
+    ax2.format_xdata = days_format
+    ax2.grid(True, which='both')
+    ax2.plot(datestamps, hmin, 'g-',
              datestamps, hmean, 'g-',
              datestamps, hmax, 'g-'
              )
-    fig1.autofmt_xdate(rotation=60)
-    plt.savefig(f1, dpi=200)
+    fig3.autofmt_xdate(rotation=60)
+    plt.savefig(f3, dpi=200)
     if not options.visual:
-        plt.close(fig1)
+        plt.close(fig3)
 
-    return f0, f1
+    return f0, f1, f2, f3
 
 
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
@@ -209,7 +234,7 @@ basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
                                            platform.node())
 mail_log = []
 
-f0, f1 = read_and_plot(options)
+plot_files = read_and_plot(options)
 
 if options.mail:
     mail = EmailMessage()
@@ -222,7 +247,7 @@ if options.mail:
                         maintype='text', subtype='plain')
 
     # https://docs.python.org/3/library/email.examples.html
-    for file in [f0, f1]:
+    for file in plot_files:
         with open(file, 'rb') as fp:
             img_data = fp.read()
         mail.add_attachment(img_data, maintype='image',
