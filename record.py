@@ -41,7 +41,7 @@ def main(options1):
     with open(options1.config_file) as f:
         config = json.load(f)
     pi = pigpio.pi()
-    data_location = sensorutils.DataLocation(config['data_directory'])
+    data_location = sensorutils.DataLocation(config['data_directory'], options1.verbose)
 
     # Check each sensor and write results to the file.
     for entry in config['sensors']:

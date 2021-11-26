@@ -11,8 +11,9 @@ import os.path
 
 class DataLocation:
 
-    def __init__(self, data_directory):
+    def __init__(self, data_directory, verbose):
         self.directory = data_directory
+        self.verbose = verbose
 
     def get_filename(self, date: datetime.date):
         """
@@ -33,6 +34,10 @@ class DataLocation:
     def record(self, epoch: int, date_time: datetime.datetime, location:str, temperature: float, humidity: float):
         filename = self.get_filename(date_time.date())
         iso_time = datetime.datetime.isoformat(date_time).split('.')[0]
+        output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\n'
         with open(filename, 'a', encoding='utf-8') as f:
-            f.write(f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\n')
+            if self.verbose:
+                print('writing to', filename)
+                print(output)
+            f.write(output)
         return
