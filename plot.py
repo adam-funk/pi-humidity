@@ -82,7 +82,8 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
 
     averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     columns = [min, meanr, medianr, max]
-    dated = dataframe.groupby('date').agg({'sg': columns, 'c': columns}).rename(columns={'meanr': 'mean', 'medianr': 'mdn'})
+    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(columns={'meanr': 'mean', 'medianr': 'mdn'})
+
 
     return []
 
