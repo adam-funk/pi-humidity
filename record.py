@@ -6,7 +6,6 @@ import time
 
 import pigpio
 import requests
-import tinydb
 
 import DHT22
 

@@ -1,0 +1,13 @@
+{
+  "sensors":
+  [
+    {
+      "led_pin": 24,
+      "sensor_pin": 23,
+      "identifier": "cellar"
+    }
+  ],
+  "data_directory": "/home/pi/dht22_data",
+  "mail_to": "me@example.com",
+  "mail_from": "me@example.com"
+}
