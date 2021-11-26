@@ -6,6 +6,7 @@ import imghdr
 import os
 import platform
 import smtplib
+import json
 import time
 from collections import defaultdict
 from email.message import EmailMessage
@@ -19,92 +20,20 @@ import pandas as pd
 # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot
 # https://matplotlib.org/tutorials/introductory/pyplot.html
 
-default_data_file = '/home/adam/sensors-data.tsv'
+import sensorutils
 
 FIGSIZE = (7, 2)
 
 
-def round_down_date(timestamp):
-    d = datetime.date.fromtimestamp(timestamp)
-    dt = datetime.datetime.combine(d, datetime.time(0, 0, 0))
-    return int(dt.timestamp())
+def generate_mail(location, dataframe, config):
+    mail = EmailMessage()
+    mail.set_charset('utf-8')
+    mail['To'] = ' '.join(config['mail_to'])
+    mail['From'] = config['mail_from']
+    mail['Subject'] = 'temperature & humidity'
 
 
-def read_raw_data(data_file):
-    # TODO filter by identifer (col 2)
-    global mail_log
-    # time -> (temp, hum)
-    data_to_use = dict()
-    # collect all the valid data from the file
-    with open(data_file, 'r') as f:
-        for line in f.readlines():
-            line_data = line.rstrip().split('\t')
-            epoch = int(line_data[0])
-            temp = float(line_data[3])
-            hum = float(line_data[4])
-            if (-10 < temp < 150) and (-1 < hum < 101):
-                data_to_use[epoch] = (temp, hum)
-            else:
-                mail_log.append("Rejected %i %s %f %f" % (epoch, line_data[1], temp, hum))
-    return data_to_use
 
-
-def reverse_days(max_days=None):
-    if max_days:
-        backdate = (datetime.date.today() - datetime.timedelta(days=max_days))
-        return int(datetime.datetime.combine(backdate,
-                                             datetime.time(0, 0, 0)).timestamp())
-    return 0
-
-
-def average_data(data_to_use, max_days=None):
-    min_timestamp = reverse_days(max_days)
-    raw_times = [ts for ts in data_to_use.keys() if ts >= min_timestamp]
-    raw_times.sort()
-    timestamps = []
-    temperatures = []
-    humidities = []
-    prev_epoch = raw_times[0]
-    prev_temp = data_to_use[prev_epoch][0]
-    prev_hum = data_to_use[prev_epoch][1]
-    # Use average of each pair of adjacent measurements
-    for epoch in raw_times[1:]:
-        timestamps.append(np.datetime64((prev_epoch + epoch) // 2, 's'))
-        temp = data_to_use[epoch][0]
-        hum = data_to_use[epoch][1]
-        temperatures.append((prev_temp + temp) / 2)
-        humidities.append((prev_hum + hum) / 2)
-        prev_epoch = epoch
-        prev_temp = temp
-        prev_hum = hum
-    return timestamps, temperatures, humidities
-
-
-def daily_data(data_to_use, max_days=None):
-    min_timestamp = reverse_days(max_days)
-    daily_temperatures = defaultdict(list)
-    daily_humidities = defaultdict(list)
-    for timestamp, (temp, hum) in data_to_use.items():
-        if timestamp >= min_timestamp:
-            rounded_timestamp = round_down_date(timestamp)
-            daily_temperatures[rounded_timestamp].append(temp)
-            daily_humidities[rounded_timestamp].append(hum)
-    timestamps = []
-    temp_max = []
-    temp_min = []
-    temp_mean = []
-    hum_max = []
-    hum_min = []
-    hum_mean = []
-    for timestamp in sorted(daily_humidities.keys()):
-        timestamps.append(np.datetime64(timestamp, 's'))
-        temp_min.append(min(daily_temperatures[timestamp]))
-        temp_mean.append(np.mean(daily_temperatures[timestamp]))
-        temp_max.append(max(daily_temperatures[timestamp]))
-        hum_min.append(min(daily_humidities[timestamp]))
-        hum_mean.append(np.mean(daily_humidities[timestamp]))
-        hum_max.append(max(daily_humidities[timestamp]))
-    return timestamps, temp_min, temp_mean, temp_max, hum_min, hum_mean, hum_max
 
 
 # MAIN
@@ -201,27 +130,30 @@ def read_and_plot(options):
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-oparser.add_argument("-d", dest="data_file",
-                     default=default_data_file,
-                     metavar="TSV",
-                     help="TSV input file")
-
-oparser.add_argument("-v", dest="visual",
+oparser.add_argument("-v", dest="verbose",
                      default=False,
                      action='store_true',
-                     help="show plots")
+                     help="verbose")
 
-oparser.add_argument("-D", dest="debug_days",
-                     default=False,
-                     action='store_true',
-                     help="debug day ranging")
-
-oparser.add_argument("-m", dest="mail",
-                     action='append',
-                     metavar='USER@EXAMPLE.COM',
-                     help="send mail to this address")
+oparser.add_argument("-c", dest="config_file",
+                     required=True,
+                     metavar="FILE",
+                     help="JSON config file")
 
 options = oparser.parse_args()
+
+
+with open(options.config_file) as f:
+    config = json.load(f)
+pi = pigpio.pi()
+data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
+
+max_days_ago = config['max_days_ago']
+
+dataframe_map = data_location.get_dataframes(max_days_ago)
+
+for location, dataframe in dataframe_map.items():
+    generate_mail(location, dataframe, config)
 
 if not options.visual:
     import matplotlib
@@ -240,32 +172,28 @@ mail_log = []
 
 plot_files = read_and_plot(options)
 
-if options.mail:
-    mail = EmailMessage()
-    mail.set_charset('utf-8')
-    mail['To'] = ', '.join(options.mail)
-    mail['From'] = 'potsmaster@ducksburg.com'
-    mail['Subject'] = 'temperature & humidity'
+mail = EmailMessage()
+mail.set_charset('utf-8')
+mail['To'] = ', '.join(options.mail)
+mail['From'] = 'potsmaster@ducksburg.com'
+mail['Subject'] = 'temperature & humidity'
 
-    mail.add_attachment(basic_message.encode('utf-8'),
+mail.add_attachment(basic_message.encode('utf-8'),
+                    disposition='inline',
+                    maintype='text', subtype='plain')
+
+# https://docs.python.org/3/library/email.examples.html
+for file in plot_files:
+    with open(file, 'rb') as fp:
+        img_data = fp.read()
+    mail.add_attachment(img_data, maintype='image',
                         disposition='inline',
-                        maintype='text', subtype='plain')
+                        subtype=imghdr.what(None, img_data))
 
-    # https://docs.python.org/3/library/email.examples.html
-    for file in plot_files:
-        with open(file, 'rb') as fp:
-            img_data = fp.read()
-        mail.add_attachment(img_data, maintype='image',
-                            disposition='inline',
-                            subtype=imghdr.what(None, img_data))
+mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
+                    disposition='inline',
+                    maintype='text', subtype='plain')
 
-    mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
-                        disposition='inline',
-                        maintype='text', subtype='plain')
+with smtplib.SMTP('localhost') as s:
+    s.send_message(mail)
 
-    with smtplib.SMTP('localhost') as s:
-        s.send_message(mail)
-
-else:
-    for text in mail_log:
-        print(text)

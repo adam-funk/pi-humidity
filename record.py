@@ -37,33 +37,30 @@ def get_data(sensor, led_pin, pi):
     return epoch, temperature, humidity, now
 
 
-def main(options1):
-    with open(options1.config_file) as f:
-        config = json.load(f)
-    pi = pigpio.pi()
-    data_location = sensorutils.DataLocation(config['data_directory'], options1.verbose)
-
-    # Check each sensor and write results to the file.
-    for entry in config['sensors']:
-        sensor = DHT22.sensor(pi, entry['sensor_pin'])
-        led_pin = entry['led_pin']
-        location = entry['location']
-        epoch, temperature, humidity, now = get_data(sensor, led_pin, pi)
-        data_location.record(epoch, now, location, temperature, humidity)
-    return
-
-
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-oparser.add_argument("-v", dest="verbose", default=False,
+oparser.add_argument("-v", dest="verbose",
+                     default=False,
                      action='store_true',
                      help="verbose")
 
 oparser.add_argument("-c", dest="config_file",
-                     metavar="JSON",
-                     help="config file")
+                     required=True,
+                     metavar="FILE",
+                     help="JSON config file")
 
 options = oparser.parse_args()
 
-main(options)
+with open(options.config_file) as f:
+    config = json.load(f)
+pi = pigpio.pi()
+data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
+
+# Check each sensor and write results to the file.
+for entry in config['sensors']:
+    sensor = DHT22.sensor(pi, entry['sensor_pin'])
+    led_pin = entry['led_pin']
+    location = entry['location']
+    epoch, temperature, humidity, now = get_data(sensor, led_pin, pi)
+    data_location.record(epoch, now, location, temperature, humidity)

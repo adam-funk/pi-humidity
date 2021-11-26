@@ -1,6 +1,5 @@
 {
-  "sensors":
-  [
+  "sensors": [
     {
       "led_pin": 24,
       "sensor_pin": 23,
@@ -8,6 +7,10 @@
     }
   ],
   "data_directory": "/home/pi/dht22_data",
-  "mail_to": "me@example.com",
-  "mail_from": "me@example.com"
+  "mail_to": [
+    "me@example.com"
+  ],
+  "mail_from": "me@example.com",
+  "averaging": "15min",
+  "max_days_ago": 10
 }

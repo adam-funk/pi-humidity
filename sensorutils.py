@@ -8,6 +8,10 @@
 import datetime
 import os.path
 
+import pandas as pd
+
+COLUMNS = ['epoch', 'iso_time', 'location', 'temperature', 'humidity']
+
 
 class DataLocation:
 
@@ -31,7 +35,7 @@ class DataLocation:
         look_for = [self.get_filename(d) for d in date_range]
         return [filename for filename in look_for if os.path.exists(filename)]
 
-    def record(self, epoch: int, date_time: datetime.datetime, location:str, temperature: float, humidity: float):
+    def record(self, epoch: int, date_time: datetime.datetime, location: str, temperature: float, humidity: float):
         filename = self.get_filename(date_time.date())
         iso_time = datetime.datetime.isoformat(date_time).split('.')[0]
         output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\n'
@@ -41,3 +45,20 @@ class DataLocation:
                 print(output)
             f.write(output)
         return
+
+    def get_dataframes(self, max_days_ago: int):
+        filenames = self.find_files(max_days_ago)
+        dataframes = []
+        for fn in filenames:
+            if self.verbose:
+                print('Reading', fn)
+            dataframes.append(pd.read_csv(fn, sep='\t', header=None, names=COLUMNS))
+        big_dataframe = pd.concat(dataframes)
+        if self.verbose:
+            print('dataframe', big_dataframe.shape)
+        del dataframes
+        locations = set(big_dataframe['locations'])
+        if self.verbose:
+            print('Locations:', ', '.join(locations))
+        return {location: big_dataframe[big_dataframe['location'] == location] for location in locations}
+
