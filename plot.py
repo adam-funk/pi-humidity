@@ -23,6 +23,7 @@ default_data_file = '/home/adam/sensors-data.tsv'
 
 FIGSIZE = (7, 2)
 
+
 def round_down_date(timestamp):
     d = datetime.date.fromtimestamp(timestamp)
     dt = datetime.datetime.combine(d, datetime.time(0, 0, 0))
@@ -58,7 +59,7 @@ def reverse_days(max_days=None):
 
 def average_data(data_to_use, max_days=None):
     min_timestamp = reverse_days(max_days)
-    raw_times = [ ts for ts in data_to_use.keys() if ts >= min_timestamp ]
+    raw_times = [ts for ts in data_to_use.keys() if ts >= min_timestamp]
     raw_times.sort()
     timestamps = []
     temperatures = []
@@ -68,7 +69,7 @@ def average_data(data_to_use, max_days=None):
     prev_hum = data_to_use[prev_epoch][1]
     # Use average of each pair of adjacent measurements
     for epoch in raw_times[1:]:
-        timestamps.append(numpy.datetime64((prev_epoch + epoch) // 2, 's'))
+        timestamps.append(np.datetime64((prev_epoch + epoch) // 2, 's'))
         temp = data_to_use[epoch][0]
         hum = data_to_use[epoch][1]
         temperatures.append((prev_temp + temp) / 2)
@@ -96,12 +97,12 @@ def daily_data(data_to_use, max_days=None):
     hum_min = []
     hum_mean = []
     for timestamp in sorted(daily_humidities.keys()):
-        timestamps.append(numpy.datetime64(timestamp, 's'))
+        timestamps.append(np.datetime64(timestamp, 's'))
         temp_min.append(min(daily_temperatures[timestamp]))
-        temp_mean.append(numpy.mean(daily_temperatures[timestamp]))
+        temp_mean.append(np.mean(daily_temperatures[timestamp]))
         temp_max.append(max(daily_temperatures[timestamp]))
         hum_min.append(min(daily_humidities[timestamp]))
-        hum_mean.append(numpy.mean(daily_humidities[timestamp]))
+        hum_mean.append(np.mean(daily_humidities[timestamp]))
         hum_max.append(max(daily_humidities[timestamp]))
     return timestamps, temp_min, temp_mean, temp_max, hum_min, hum_mean, hum_max
 
@@ -124,7 +125,7 @@ def read_and_plot(options):
         plt.ioff()
 
     days_locator = dates.DayLocator(interval=1)
-    #days_format = dates.DateFormatter('%Y-%m-%d')
+    # days_format = dates.DateFormatter('%Y-%m-%d')
     days_format = dates.DateFormatter('%d')
 
     # smoothed plot
@@ -133,7 +134,7 @@ def read_and_plot(options):
     fig0, ax0 = plt.subplots(figsize=FIGSIZE)
     ax0.xaxis.set_major_locator(days_locator)
     ax0.xaxis.set_major_formatter(days_format)
-    #ax0.xaxis.set_minor_locator(days)
+    # ax0.xaxis.set_minor_locator(days)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
     ax0.plot(all_timestamps, all_temperatures, 'b,-')
@@ -143,10 +144,10 @@ def read_and_plot(options):
     if not options.visual:
         plt.close(fig0)
 
-    fig1, ax1= plt.subplots(figsize=FIGSIZE)
+    fig1, ax1 = plt.subplots(figsize=FIGSIZE)
     ax1.xaxis.set_major_locator(days_locator)
     ax1.xaxis.set_major_formatter(days_format)
-    #ax1.xaxis.set_minor_locator(days)
+    # ax1.xaxis.set_minor_locator(days)
     ax1.format_xdata = days_format
     ax1.grid(True, which='both')
     ax1.plot(all_timestamps, all_humidities, 'g,-')
@@ -167,7 +168,7 @@ def read_and_plot(options):
     fig2, ax2 = plt.subplots(figsize=FIGSIZE)
     ax2.xaxis.set_major_locator(days_locator)
     ax2.xaxis.set_major_formatter(days_format)
-    #ax2.xaxis.set_minor_locator(days)
+    # ax2.xaxis.set_minor_locator(days)
     ax2.format_xdata = days_format
     ax2.grid(True, which='both')
     ax2.plot(datestamps, tmin, 'b-',
@@ -182,7 +183,7 @@ def read_and_plot(options):
     fig3, ax2 = plt.subplots(figsize=FIGSIZE)
     ax2.xaxis.set_major_locator(days_locator)
     ax2.xaxis.set_major_formatter(days_format)
-    #ax2.xaxis.set_minor_locator(days)
+    # ax2.xaxis.set_minor_locator(days)
     ax2.format_xdata = days_format
     ax2.grid(True, which='both')
     ax2.plot(datestamps, hmin, 'g-',
@@ -224,6 +225,7 @@ options = oparser.parse_args()
 
 if not options.visual:
     import matplotlib
+
     matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -248,13 +250,13 @@ if options.mail:
     mail.add_attachment(basic_message.encode('utf-8'),
                         disposition='inline',
                         maintype='text', subtype='plain')
-    
+
     # https://docs.python.org/3/library/email.examples.html
     for file in plot_files:
         with open(file, 'rb') as fp:
             img_data = fp.read()
         mail.add_attachment(img_data, maintype='image',
-                        disposition='inline',
+                            disposition='inline',
                             subtype=imghdr.what(None, img_data))
 
     mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
