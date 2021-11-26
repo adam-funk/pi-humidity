@@ -55,6 +55,7 @@ class DataLocation:
             dataframes.append(pd.read_csv(fn, sep='\t', header=None, names=COLUMNS))
         big_dataframe = pd.concat(dataframes)
         big_dataframe['timestamp'] = pd.to_datetime(big_dataframe['iso_time'])
+        big_dataframe['date'] = big_dataframe['timestamp'].dt.date
         big_dataframe = big_dataframe.sort_values(by='timestamp', axis=0)
         if self.verbose:
             print('dataframe', big_dataframe.shape)

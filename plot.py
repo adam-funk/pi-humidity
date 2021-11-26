@@ -32,6 +32,16 @@ import sensorutils
 FIGSIZE = (7, 2)
 
 
+def meanr(x):
+    # ignore NaN (blank fields in the CSV
+    return round(np.nanmean(x), 1)
+
+
+def medianr(x):
+    # ignore NaN (blank fields in the CSV
+    return round(np.nanmedian(x), 1)
+
+
 def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
     message.set_charset('utf-8')
@@ -59,18 +69,20 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
 
 
 def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
-    output_dir = '/tmp/sensor-plots-%i' % int(time.time())
+    output_dir = f'/tmp/sensor-plots-{location}-{int(time.time())}'
     os.mkdir(output_dir)
-    f0 = os.path.join(output_dir, 'tem_7_days_smoothed.png')
-    f1 = os.path.join(output_dir, 'hum_7_days_smoothed.png')
-    f2 = os.path.join(output_dir, 'tem_12_days_ranged.png')
-    f3 = os.path.join(output_dir, 'hum_12_days_ranged.png')
+    f0 = os.path.join(output_dir, 'temp_smoothed.png')
+    f1 = os.path.join(output_dir, 'hum_smoothed.png')
+    f2 = os.path.join(output_dir, 'temp_days.png')
+    f3 = os.path.join(output_dir, 'hum_days.png')
 
     days_locator = dates.DayLocator(interval=1)
     # days_format = dates.DateFormatter('%Y-%m-%d')
     days_format = dates.DateFormatter('%d')
 
-    dataframe = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+    averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+    columns = [min, meanr, medianr, max]
+    dated = dataframe.groupby('date').agg({'sg': columns, 'c': columns}).rename(columns={'meanr': 'mean', 'medianr': 'mdn'})
 
     return []
 
@@ -78,18 +90,6 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
 
 # MAIN
 def read_and_plot(options):
-
-    general_data = read_raw_data(options.data_file)
-
-    # https://stackoverflow.com/questions/15713279/calling-pylab-savefig-without-display-in-ipython
-    if options.visual:
-        plt.ion()
-    else:
-        plt.ioff()
-
-    days_locator = dates.DayLocator(interval=1)
-    # days_format = dates.DateFormatter('%Y-%m-%d')
-    days_format = dates.DateFormatter('%d')
 
     # smoothed plot
     all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=7)
