@@ -5,11 +5,18 @@ import datetime
 import imghdr
 import os
 import platform
-import smtplib
 import json
 import time
-from collections import defaultdict
 from email.message import EmailMessage
+from subprocess import Popen, PIPE
+import matplotlib
+matplotlib.use('Agg')
+
+import matplotlib.pyplot as plt
+from matplotlib import dates
+
+# https://stackoverflow.com/questions/15713279/calling-pylab-savefig-without-display-in-ipython
+plt.ioff()
 
 import numpy as np
 import pandas as pd
@@ -25,25 +32,52 @@ import sensorutils
 FIGSIZE = (7, 2)
 
 
-def generate_mail(location, dataframe, config):
-    mail = EmailMessage()
-    mail.set_charset('utf-8')
-    mail['To'] = ' '.join(config['mail_to'])
-    mail['From'] = config['mail_from']
-    mail['Subject'] = 'temperature & humidity'
+def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
+    message = EmailMessage()
+    message.set_charset('utf-8')
+    message['To'] = ' '.join(config1['mail_to'])
+    message['From'] = config1['mail_from']
+    message['Subject'] = f'temperature & humidity: {location}'
+    basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
+                                               platform.node())
+    message.add_attachment(basic_message.encode('utf-8'),
+                        disposition='inline',
+                        maintype='text', subtype='plain')
+    # https://docs.python.org/3/library/email.examples.html
+
+    plot_files = generate_plots(location, dataframe, config1, verbose)
+
+    for plot_file in plot_files:
+        with open(plot_file, 'rb') as fp:
+            img_data = fp.read()
+        message.add_attachment(img_data, maintype='image',
+                            disposition='inline',
+                            subtype=imghdr.what(None, img_data))
+    p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
+    p.communicate(message.as_bytes())
+    return
 
 
-
-
-
-# MAIN
-def read_and_plot(options):
+def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     output_dir = '/tmp/sensor-plots-%i' % int(time.time())
     os.mkdir(output_dir)
     f0 = os.path.join(output_dir, 'tem_7_days_smoothed.png')
     f1 = os.path.join(output_dir, 'hum_7_days_smoothed.png')
     f2 = os.path.join(output_dir, 'tem_12_days_ranged.png')
     f3 = os.path.join(output_dir, 'hum_12_days_ranged.png')
+
+    days_locator = dates.DayLocator(interval=1)
+    # days_format = dates.DateFormatter('%Y-%m-%d')
+    days_format = dates.DateFormatter('%d')
+
+    dataframe = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+
+    return []
+
+
+
+# MAIN
+def read_and_plot(options):
 
     general_data = read_raw_data(options.data_file)
 
@@ -152,48 +186,7 @@ max_days_ago = config['max_days_ago']
 
 dataframe_map = data_location.get_dataframes(max_days_ago)
 
-for location, dataframe in dataframe_map.items():
-    generate_mail(location, dataframe, config)
+for location0, dataframe0 in dataframe_map.items():
+    generate_mail(location0, dataframe0, config, options.verbose)
 
-if not options.visual:
-    import matplotlib
-
-    matplotlib.use('Agg')
-
-import matplotlib.pyplot as plt
-from matplotlib import dates
-
-# mail_log = ['Now = %s' % datetime.datetime.now().isoformat(timespec='seconds')]
-# honeydew uses python 3.5: no timespec
-
-basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
-                                           platform.node())
-mail_log = []
-
-plot_files = read_and_plot(options)
-
-mail = EmailMessage()
-mail.set_charset('utf-8')
-mail['To'] = ', '.join(options.mail)
-mail['From'] = 'potsmaster@ducksburg.com'
-mail['Subject'] = 'temperature & humidity'
-
-mail.add_attachment(basic_message.encode('utf-8'),
-                    disposition='inline',
-                    maintype='text', subtype='plain')
-
-# https://docs.python.org/3/library/email.examples.html
-for file in plot_files:
-    with open(file, 'rb') as fp:
-        img_data = fp.read()
-    mail.add_attachment(img_data, maintype='image',
-                        disposition='inline',
-                        subtype=imghdr.what(None, img_data))
-
-mail.add_attachment('\n'.join(mail_log).encode('utf-8'),
-                    disposition='inline',
-                    maintype='text', subtype='plain')
-
-with smtplib.SMTP('localhost') as s:
-    s.send_message(mail)
 

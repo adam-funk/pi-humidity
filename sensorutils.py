@@ -35,9 +35,9 @@ class DataLocation:
         look_for = [self.get_filename(d) for d in date_range]
         return [filename for filename in look_for if os.path.exists(filename)]
 
-    def record(self, epoch: int, date_time: datetime.datetime, location: str, temperature: float, humidity: float):
-        filename = self.get_filename(date_time.date())
-        iso_time = datetime.datetime.isoformat(date_time).split('.')[0]
+    def record(self, epoch: int, iso_time: datetime.datetime, location: str, temperature: float, humidity: float):
+        filename = self.get_filename(iso_time.date())
+        iso_time = datetime.datetime.isoformat(iso_time).split('.')[0]
         output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\n'
         with open(filename, 'a', encoding='utf-8') as f:
             if self.verbose:
@@ -54,6 +54,8 @@ class DataLocation:
                 print('Reading', fn)
             dataframes.append(pd.read_csv(fn, sep='\t', header=None, names=COLUMNS))
         big_dataframe = pd.concat(dataframes)
+        big_dataframe['timestamp'] = pd.to_datetime(big_dataframe['iso_time'])
+        big_dataframe = big_dataframe.sort_values(by='timestamp', axis=0)
         if self.verbose:
             print('dataframe', big_dataframe.shape)
         del dataframes
