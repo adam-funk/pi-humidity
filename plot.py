@@ -78,18 +78,21 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     f3 = os.path.join(output_dir, 'hum_days.png')
 
     days_locator = dates.DayLocator(interval=1)
-    # days_format = dates.DateFormatter('%Y-%m-%d')
     days_format = dates.DateFormatter('%d')
 
     averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
     averaged = averaged[averaged.index >= cutoff_time]
+    if verbose:
+        print('Smoothed df', averaged.shape)
 
     columns = [min, meanr, medianr, max]
     dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
     cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
     dated = dated[dated.index >= cutoff_date]
+    if verbose:
+        print('Dated df', dated.shape)
 
     # smoothed temperature plot
     fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
@@ -157,7 +160,7 @@ options = oparser.parse_args()
 
 with open(options.config_file) as f:
     config = json.load(f)
-pi = pigpio.pi()
+
 data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
 
 max_days_ago = max(config['days'], config['days_ranged'])
