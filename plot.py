@@ -10,6 +10,7 @@ import time
 from email.message import EmailMessage
 from subprocess import Popen, PIPE
 import matplotlib
+
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
@@ -51,8 +52,8 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
     basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
                                                platform.node())
     message.add_attachment(basic_message.encode('utf-8'),
-                        disposition='inline',
-                        maintype='text', subtype='plain')
+                           disposition='inline',
+                           maintype='text', subtype='plain')
     # https://docs.python.org/3/library/email.examples.html
 
     plot_files = generate_plots(location, dataframe, config1, verbose)
@@ -61,8 +62,8 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
         with open(plot_file, 'rb') as fp:
             img_data = fp.read()
         message.add_attachment(img_data, maintype='image',
-                            disposition='inline',
-                            subtype=imghdr.what(None, img_data))
+                               disposition='inline',
+                               subtype=imghdr.what(None, img_data))
     p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
     p.communicate(message.as_bytes())
     return
@@ -82,84 +83,56 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
 
     averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     columns = [min, meanr, medianr, max]
-    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(columns={'meanr': 'mean', 'medianr': 'mdn'})
+    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(
+        columns={'meanr': 'mean', 'medianr': 'mdn'})
 
-
-    return []
-
-
-
-# MAIN
-def read_and_plot(options):
-
-    # smoothed plot
-    all_timestamps, all_temperatures, all_humidities = average_data(general_data, max_days=7)
-
+    # smoothed temperature plot
     fig0, ax0 = plt.subplots(figsize=FIGSIZE)
     ax0.xaxis.set_major_locator(days_locator)
     ax0.xaxis.set_major_formatter(days_format)
-    # ax0.xaxis.set_minor_locator(days)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
-    ax0.plot(all_timestamps, all_temperatures, 'b,-')
+    ax0.plot(averaged.index, averaged['temperature'], 'b,-')
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
     plt.savefig(f0, dpi=200)
-    if not options.visual:
-        plt.close(fig0)
+    plt.close(fig0)
 
+    # smoothed humidity plot
     fig1, ax1 = plt.subplots(figsize=FIGSIZE)
     ax1.xaxis.set_major_locator(days_locator)
     ax1.xaxis.set_major_formatter(days_format)
-    # ax1.xaxis.set_minor_locator(days)
     ax1.format_xdata = days_format
     ax1.grid(True, which='both')
-    ax1.plot(all_timestamps, all_humidities, 'g,-')
+    ax1.plot(averaged.index, averaged['humidity'], 'g,-')
     # autofmt needs to happen after data
     fig1.autofmt_xdate(rotation=60)
     plt.savefig(f1, dpi=200)
-    if not options.visual:
-        plt.close(fig1)
+    plt.close(fig1)
 
-    # ranged plot
-    datestamps, tmin, tmean, tmax, hmin, hmean, hmax = daily_data(general_data, max_days=20)
-
-    if options.debug_days:
-        mail_log.append('\nDay data:')
-        for stuff in zip(datestamps, tmin, tmean, tmax, hmin, hmean, hmax):
-            mail_log.append(' '.join([str(x) for x in stuff]))
-
+    # temperature by day
     fig2, ax2 = plt.subplots(figsize=FIGSIZE)
     ax2.xaxis.set_major_locator(days_locator)
     ax2.xaxis.set_major_formatter(days_format)
-    # ax2.xaxis.set_minor_locator(days)
     ax2.format_xdata = days_format
     ax2.grid(True, which='both')
-    ax2.plot(datestamps, tmin, 'b-',
-             datestamps, tmean, 'b-',
-             datestamps, tmax, 'b-',
-             )
+    ax2.plot(dated.index, dated['temperature'])
     fig2.autofmt_xdate(rotation=60)
     plt.savefig(f2, dpi=200)
-    if not options.visual:
-        plt.close(fig2)
+    plt.close(fig2)
 
-    fig3, ax2 = plt.subplots(figsize=FIGSIZE)
-    ax2.xaxis.set_major_locator(days_locator)
-    ax2.xaxis.set_major_formatter(days_format)
-    # ax2.xaxis.set_minor_locator(days)
-    ax2.format_xdata = days_format
-    ax2.grid(True, which='both')
-    ax2.plot(datestamps, hmin, 'g-',
-             datestamps, hmean, 'g-',
-             datestamps, hmax, 'g-'
-             )
+    # humidity by day
+    fig3, ax3 = plt.subplots(figsize=FIGSIZE)
+    ax3.xaxis.set_major_locator(days_locator)
+    ax3.xaxis.set_major_formatter(days_format)
+    ax3.format_xdata = days_format
+    ax3.grid(True, which='both')
+    ax3.plot(dated.index, dated['humidity'])
     fig3.autofmt_xdate(rotation=60)
     plt.savefig(f3, dpi=200)
-    if not options.visual:
-        plt.close(fig3)
+    plt.close(fig3)
 
-    return f0, f1, f2, f3
+    return [f0, f1, f2, f3]
 
 
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
@@ -177,7 +150,6 @@ oparser.add_argument("-c", dest="config_file",
 
 options = oparser.parse_args()
 
-
 with open(options.config_file) as f:
     config = json.load(f)
 pi = pigpio.pi()
@@ -189,5 +161,3 @@ dataframe_map = data_location.get_dataframes(max_days_ago)
 
 for location0, dataframe0 in dataframe_map.items():
     generate_mail(location0, dataframe0, config, options.verbose)
-
-
