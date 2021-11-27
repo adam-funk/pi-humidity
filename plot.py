@@ -46,24 +46,22 @@ def medianr(x):
 def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
     message.set_charset('utf-8')
-    message['To'] = ' '.join(config1['mail_to'])
+    message['To'] = ','.join(config1['mail_to'])
     message['From'] = config1['mail_from']
     message['Subject'] = f'temperature & humidity: {location}'
-    basic_message = 'Now = %s\nServer = %s' % (datetime.datetime.now().isoformat(),
-                                               platform.node())
-    message.add_attachment(basic_message.encode('utf-8'),
-                           disposition='inline',
-                           maintype='text', subtype='plain')
     # https://docs.python.org/3/library/email.examples.html
 
     plot_files = generate_plots(location, dataframe, config1, verbose)
-
     for plot_file in plot_files:
         with open(plot_file, 'rb') as fp:
             img_data = fp.read()
         message.add_attachment(img_data, maintype='image',
                                disposition='inline',
                                subtype=imghdr.what(None, img_data))
+    basic_message = f'{datetime.datetime.now().isoformat().split("T")[0]}\n{platform.node()}'
+    message.add_attachment(basic_message.encode('utf-8'),
+                           disposition='inline',
+                           maintype='text', subtype='plain')
     p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
     p.communicate(message.as_bytes())
     return
@@ -72,6 +70,8 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
 def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     output_dir = f'/tmp/sensor-plots-{location}-{int(time.time())}'
     os.mkdir(output_dir)
+    if verbose:
+        print(output_dir)
     f0 = os.path.join(output_dir, 'temp_smoothed.png')
     f1 = os.path.join(output_dir, 'hum_smoothed.png')
     f2 = os.path.join(output_dir, 'temp_days.png')

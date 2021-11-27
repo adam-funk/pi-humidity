@@ -69,7 +69,7 @@ class DataLocation:
         if self.verbose:
             print('dataframe', big_dataframe.shape)
         del dataframes
-        locations = set(big_dataframe['locations'])
+        locations = set(big_dataframe['location'])
         if self.verbose:
             print('Locations:', ', '.join(locations))
         return {location: big_dataframe[big_dataframe['location'] == location] for location in locations}
