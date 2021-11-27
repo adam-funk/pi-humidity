@@ -30,7 +30,7 @@ import pandas as pd
 
 import sensorutils
 
-FIGSIZE = (7, 2)
+FIG_SIZE = (7, 2)
 
 
 def meanr(x):
@@ -82,52 +82,57 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     days_format = dates.DateFormatter('%d')
 
     averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+    cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
+    averaged = averaged[averaged.index >= cutoff_time]
+
     columns = [min, meanr, medianr, max]
     dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
+    cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
+    dated = dated[dated.index >= cutoff_date]
 
     # smoothed temperature plot
-    fig0, ax0 = plt.subplots(figsize=FIGSIZE)
+    fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
     ax0.xaxis.set_major_locator(days_locator)
     ax0.xaxis.set_major_formatter(days_format)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
-    ax0.plot(averaged.index, averaged['temperature'], 'b,-')
+    ax0.plot(averaged.index, averaged['temperature'], '-b')
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
     plt.savefig(f0, dpi=200)
     plt.close(fig0)
 
     # smoothed humidity plot
-    fig1, ax1 = plt.subplots(figsize=FIGSIZE)
+    fig1, ax1 = plt.subplots(figsize=FIG_SIZE)
     ax1.xaxis.set_major_locator(days_locator)
     ax1.xaxis.set_major_formatter(days_format)
     ax1.format_xdata = days_format
     ax1.grid(True, which='both')
-    ax1.plot(averaged.index, averaged['humidity'], 'g,-')
+    ax1.plot(averaged.index, averaged['humidity'], '-g')
     # autofmt needs to happen after data
     fig1.autofmt_xdate(rotation=60)
     plt.savefig(f1, dpi=200)
     plt.close(fig1)
 
     # temperature by day
-    fig2, ax2 = plt.subplots(figsize=FIGSIZE)
+    fig2, ax2 = plt.subplots(figsize=FIG_SIZE)
     ax2.xaxis.set_major_locator(days_locator)
     ax2.xaxis.set_major_formatter(days_format)
     ax2.format_xdata = days_format
     ax2.grid(True, which='both')
-    ax2.plot(dated.index, dated['temperature'])
+    ax2.plot(dated.index, dated['temperature'], '-')
     fig2.autofmt_xdate(rotation=60)
     plt.savefig(f2, dpi=200)
     plt.close(fig2)
 
     # humidity by day
-    fig3, ax3 = plt.subplots(figsize=FIGSIZE)
+    fig3, ax3 = plt.subplots(figsize=FIG_SIZE)
     ax3.xaxis.set_major_locator(days_locator)
     ax3.xaxis.set_major_formatter(days_format)
     ax3.format_xdata = days_format
     ax3.grid(True, which='both')
-    ax3.plot(dated.index, dated['humidity'])
+    ax3.plot(dated.index, dated['humidity'], '-')
     fig3.autofmt_xdate(rotation=60)
     plt.savefig(f3, dpi=200)
     plt.close(fig3)
@@ -155,7 +160,7 @@ with open(options.config_file) as f:
 pi = pigpio.pi()
 data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
 
-max_days_ago = config['max_days_ago']
+max_days_ago = max(config['days'], config['days_ranged'])
 
 dataframe_map = data_location.get_dataframes(max_days_ago)
 

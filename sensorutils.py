@@ -13,6 +13,15 @@ import pandas as pd
 COLUMNS = ['epoch', 'iso_time', 'location', 'temperature', 'humidity']
 
 
+def get_cutoff_date(days_ago: int):
+    return datetime.date.today() - datetime.timedelta(days=days_ago)
+
+
+def get_cutoff_time(days_ago: int):
+    cutoff_date = get_cutoff_date(days_ago)
+    return datetime.datetime.combine(cutoff_date, datetime.time())
+
+
 class DataLocation:
 
     def __init__(self, data_directory, verbose):
@@ -64,4 +73,3 @@ class DataLocation:
         if self.verbose:
             print('Locations:', ', '.join(locations))
         return {location: big_dataframe[big_dataframe['location'] == location] for location in locations}
-
