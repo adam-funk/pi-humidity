@@ -164,6 +164,8 @@ with open(options.config_file) as f:
 data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
 
 max_days_ago = max(config['days_smoothed'], config['days_ranged'])
+if options.verbose:
+    print('max days ago', max_days_ago)
 
 dataframe_map = data_location.get_dataframes(max_days_ago)
 
