@@ -5,7 +5,6 @@ import json
 import time
 
 import pigpio
-import requests
 
 import DHT22
 import sensorutils
