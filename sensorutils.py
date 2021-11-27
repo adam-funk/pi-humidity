@@ -33,7 +33,7 @@ class DataLocation:
         Generate the correct filename for the given date.
         """
         date_string = date.isoformat()
-        filename = os.path.join(self.directory, f'sensors{date_string}.tsv')
+        filename = os.path.join(self.directory, f'sensors-{date_string}.tsv')
         return filename
 
     def find_files(self, max_days_ago: int):

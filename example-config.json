@@ -3,7 +3,7 @@
     {
       "led_pin": 24,
       "sensor_pin": 23,
-      "identifier": "cellar"
+      "location": "cellar"
     }
   ],
   "data_directory": "/home/pi/dht22_data",
