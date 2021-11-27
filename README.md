@@ -1,7 +1,7 @@
 # pi-humidity
 
 Tools for logging DHT22 temperature and humidity and generating
-plots.
+plots, intended for use from cron.
 
 ## required config file
 
