@@ -7,6 +7,7 @@ import os
 import platform
 import json
 import time
+import warnings
 from email.message import EmailMessage
 from subprocess import Popen, PIPE
 import matplotlib
@@ -34,14 +35,19 @@ FIG_SIZE = (7, 2)
 
 
 def meanr(x):
-    # ignore NaN (blank fields in the CSV
-    return round(np.nanmean(x), 1)
+    # ignore NaN (blank fields in the CSV) and averages over missing times
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='ignore', category=RuntimeWarning, message='Mean of empty slice')
+        result = round(np.nanmean(x), 1)
+    return result
 
 
 def medianr(x):
-    # ignore NaN (blank fields in the CSV
-    return round(np.nanmedian(x), 1)
-
+    # ignore NaN (blank fields in the CSV) and averages over missing times
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='ignore', category=RuntimeWarning, message='Mean of empty slice')
+        result = round(np.nanmedian(x), 1)
+    return result
 
 def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
