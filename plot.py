@@ -3,13 +3,13 @@
 import argparse
 import datetime
 import imghdr
-import os
-import platform
 import json
-import time
+import platform
 import warnings
 from email.message import EmailMessage
+from io import BytesIO
 from subprocess import Popen, PIPE
+
 import matplotlib
 
 matplotlib.use('Agg')
@@ -57,10 +57,10 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
     message['Subject'] = f'temperature & humidity: {location}'
     # https://docs.python.org/3/library/email.examples.html
 
-    plot_files = generate_plots(location, dataframe, config1, verbose)
-    for plot_file in plot_files:
-        with open(plot_file, 'rb') as fp:
-            img_data = fp.read()
+    buffers = generate_plots(location, dataframe, config1, verbose)
+    for buffer in buffers:
+        buffer.seek(0)
+        img_data = buffer.read()
         message.add_attachment(img_data, maintype='image',
                                disposition='inline',
                                subtype=imghdr.what(None, img_data))
@@ -74,18 +74,10 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
 
 
 def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
-    output_dir = f'/tmp/sensor-plots-{location}-{int(time.time())}'
-    os.mkdir(output_dir)
-    if verbose:
-        print(output_dir)
-    f0 = os.path.join(output_dir, 'temp_smoothed.png')
-    f1 = os.path.join(output_dir, 'hum_smoothed.png')
-    f2 = os.path.join(output_dir, 'temp_days.png')
-    f3 = os.path.join(output_dir, 'hum_days.png')
-
     days_locator = dates.DayLocator(interval=1)
     days_format = dates.DateFormatter('%d')
 
+    pngs = []
     averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
     averaged = averaged[averaged.index >= cutoff_time]
@@ -101,6 +93,7 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
         print('Dated df', dated.shape)
 
     # smoothed temperature plot
+    buffer0 = BytesIO()
     fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
     ax0.xaxis.set_major_locator(days_locator)
     ax0.xaxis.set_major_formatter(days_format)
@@ -109,10 +102,12 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     ax0.plot(averaged.index, averaged['temperature'], '-b')
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
-    plt.savefig(f0, dpi=200)
+    plt.savefig(buffer0, dpi=200, format='png')
     plt.close(fig0)
+    pngs.append(buffer0)
 
     # smoothed humidity plot
+    buffer1 = BytesIO()
     fig1, ax1 = plt.subplots(figsize=FIG_SIZE)
     ax1.xaxis.set_major_locator(days_locator)
     ax1.xaxis.set_major_formatter(days_format)
@@ -121,10 +116,12 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     ax1.plot(averaged.index, averaged['humidity'], '-g')
     # autofmt needs to happen after data
     fig1.autofmt_xdate(rotation=60)
-    plt.savefig(f1, dpi=200)
+    plt.savefig(buffer1, dpi=200, format='png')
     plt.close(fig1)
+    pngs.append(buffer1)
 
     # temperature by day
+    buffer2 = BytesIO()
     fig2, ax2 = plt.subplots(figsize=FIG_SIZE)
     ax2.xaxis.set_major_locator(days_locator)
     ax2.xaxis.set_major_formatter(days_format)
@@ -132,10 +129,12 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     ax2.grid(True, which='both')
     ax2.plot(dated.index, dated['temperature'], '-')
     fig2.autofmt_xdate(rotation=60)
-    plt.savefig(f2, dpi=200)
+    plt.savefig(buffer2, dpi=200, format='png')
     plt.close(fig2)
+    pngs.append(buffer2)
 
     # humidity by day
+    buffer3 = BytesIO()
     fig3, ax3 = plt.subplots(figsize=FIG_SIZE)
     ax3.xaxis.set_major_locator(days_locator)
     ax3.xaxis.set_major_formatter(days_format)
@@ -143,10 +142,11 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     ax3.grid(True, which='both')
     ax3.plot(dated.index, dated['humidity'], '-')
     fig3.autofmt_xdate(rotation=60)
-    plt.savefig(f3, dpi=200)
+    plt.savefig(buffer3, dpi=200, format='png')
     plt.close(fig3)
+    pngs.append(buffer3)
 
-    return [f0, f1, f2, f3]
+    return pngs
 
 
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
