@@ -65,6 +65,8 @@ class DataLocation:
         big_dataframe = pd.concat(dataframes)
         big_dataframe['timestamp'] = pd.to_datetime(big_dataframe['iso_time'])
         big_dataframe['date'] = big_dataframe['timestamp'].dt.date
+        # filter out error readings
+        big_dataframe = big_dataframe[(big_dataframe['temperature'] > -999) & (big_dataframe['humidity'] > -999) ]
         big_dataframe = big_dataframe.sort_values(by='timestamp', axis=0)
         if self.verbose:
             print('dataframe', big_dataframe.shape)
