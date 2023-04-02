@@ -10,21 +10,20 @@ import bme680
 import sensorutils
 
 
-def get_data(sensor, led_pin, pi):
-    sensor.trigger()
-    time.sleep(0.5)
-    now = datetime.datetime.now()
-    epoch = int(time.time())
-    temperature = round(sensor.temperature(), 1)
-    humidity = round(sensor.humidity(), 1)
+def get_data(sensor0):
+    while True:
+        if sensor0.get_sensor_data():
+            temperature0 = sensor0.data.temperature
+            humidity0 = sensor0.data.humidity
+            pressure0 = sensor0.data.pressure
+            now0 = datetime.datetime.now()
+            epoch0 = int(time.time())
+            break
+        time.sleep(1)
     if options.verbose:
-        iso_time = datetime.datetime.isoformat(now).split('.')[0]
-        print('Measurement:', iso_time, temperature, humidity)
-    if (temperature > -10) and (humidity > 0):
-        signal_blinks(led_pin, 3, 0.5, pi)
-    else:
-        signal_blinks(led_pin, 9, 0.2, pi)
-    return epoch, temperature, humidity, now
+        iso_time = datetime.datetime.isoformat(now0).split('.')[0]
+        print('Measurement:', iso_time, temperature0, humidity0)
+    return epoch0, now0, temperature0, humidity0, pressure0
 
 
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
@@ -44,13 +43,22 @@ options = oparser.parse_args()
 
 with open(options.config_file) as f:
     config = json.load(f)
-pi = pigpio.pi()
 data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
+location = config['location']
 
-# Check each sensor and write results to the file.
-for entry in config['sensors']:
-    sensor = DHT22.sensor(pi, entry['sensor_pin'])
-    led_pin = entry['led_pin']
-    location = entry['location']
-    epoch, temperature, humidity, now = get_data(sensor, led_pin, pi)
-    data_location.record(epoch, now, location, temperature, humidity)
+# https://learn.pimoroni.com/article/getting-started-with-bme680-breakout
+
+sensor = bme680.BME680()
+
+sensor.set_humidity_oversample(bme680.OS_2X)
+sensor.set_pressure_oversample(bme680.OS_4X)
+sensor.set_temperature_oversample(bme680.OS_8X)
+sensor.set_filter(bme680.FILTER_SIZE_3)
+
+sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
+sensor.set_gas_heater_temperature(320)
+sensor.set_gas_heater_duration(150)
+sensor.select_gas_heater_profile(0)
+
+epoch, now, temperature, humidity, pressure = get_data(sensor)
+data_location.record(epoch, now, location, temperature, humidity, pressure)

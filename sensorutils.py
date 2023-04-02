@@ -10,7 +10,7 @@ import os.path
 
 import pandas as pd
 
-COLUMNS = ['epoch', 'iso_time', 'location', 'temperature', 'humidity']
+COLUMNS = ['epoch', 'iso_time', 'location', 'temperature', 'humidity', 'pressure']
 
 
 def get_cutoff_date(days_ago: int):
@@ -44,10 +44,11 @@ class DataLocation:
         look_for = [self.get_filename(d) for d in date_range]
         return [filename for filename in look_for if os.path.exists(filename)]
 
-    def record(self, epoch: int, iso_time: datetime.datetime, location: str, temperature: float, humidity: float):
+    def record(self, epoch: int, iso_time: datetime.datetime, location: str,
+               temperature: float, humidity: float, pressure: float):
         filename = self.get_filename(iso_time.date())
         iso_time = datetime.datetime.isoformat(iso_time).split('.')[0]
-        output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\n'
+        output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\t{pressure}\n'
         with open(filename, 'a', encoding='utf-8') as f:
             if self.verbose:
                 print('writing to', filename)

@@ -49,6 +49,7 @@ def medianr(x):
         result = round(np.nanmedian(x), 1)
     return result
 
+
 def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
     message.set_charset('utf-8')
@@ -57,7 +58,7 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
     message['Subject'] = f'temperature & humidity: {location}'
     # https://docs.python.org/3/library/email.examples.html
 
-    buffers = generate_plots(location, dataframe, config1, verbose)
+    buffers = generate_plots(dataframe, config1, verbose)
     for buffer in buffers:
         buffer.seek(0)
         img_data = buffer.read()
@@ -73,7 +74,7 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
     return
 
 
-def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
+def generate_plots(dataframe: pd.DataFrame, config1: dict, verbose: bool):
     days_locator = dates.DayLocator(interval=1)
     days_format = dates.DateFormatter('%d')
 
@@ -85,7 +86,7 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
         print('Smoothed df', averaged.shape)
 
     columns = [min, meanr, medianr, max]
-    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns}).rename(
+    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns, 'pressure': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
     cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
     dated = dated[dated.index >= cutoff_date]
@@ -120,6 +121,20 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     plt.close(fig1)
     pngs.append(buffer1)
 
+    # smoothed pressure plot
+    buffer1 = BytesIO()
+    fig1, ax1 = plt.subplots(figsize=FIG_SIZE)
+    ax1.xaxis.set_major_locator(days_locator)
+    ax1.xaxis.set_major_formatter(days_format)
+    ax1.format_xdata = days_format
+    ax1.grid(True, which='both')
+    ax1.plot(averaged.index, averaged['pressure'], '-g')
+    # autofmt needs to happen after data
+    fig1.autofmt_xdate(rotation=60)
+    plt.savefig(buffer1, dpi=200, format='png')
+    plt.close(fig1)
+    pngs.append(buffer1)
+
     # temperature by day
     buffer2 = BytesIO()
     fig2, ax2 = plt.subplots(figsize=FIG_SIZE)
@@ -141,6 +156,19 @@ def generate_plots(location: str, dataframe: pd.DataFrame, config1: dict, verbos
     ax3.format_xdata = days_format
     ax3.grid(True, which='both')
     ax3.plot(dated.index, dated['humidity'], '-')
+    fig3.autofmt_xdate(rotation=60)
+    plt.savefig(buffer3, dpi=200, format='png')
+    plt.close(fig3)
+    pngs.append(buffer3)
+
+    # pressure by day
+    buffer3 = BytesIO()
+    fig3, ax3 = plt.subplots(figsize=FIG_SIZE)
+    ax3.xaxis.set_major_locator(days_locator)
+    ax3.xaxis.set_major_formatter(days_format)
+    ax3.format_xdata = days_format
+    ax3.grid(True, which='both')
+    ax3.plot(dated.index, dated['pressure'], '-')
     fig3.autofmt_xdate(rotation=60)
     plt.savefig(buffer3, dpi=200, format='png')
     plt.close(fig3)
