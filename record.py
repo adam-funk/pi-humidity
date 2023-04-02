@@ -6,17 +6,8 @@ import time
 
 import pigpio
 
-import DHT22
+import bme680
 import sensorutils
-
-
-def signal_blinks(led_pin, nbr_blinks, pause, pi):
-    for i in range(0, nbr_blinks):
-        pi.write(led_pin, 1)
-        time.sleep(pause)
-        pi.write(led_pin, 0)
-        time.sleep(pause)
-    return
 
 
 def get_data(sensor, led_pin, pi):
