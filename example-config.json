@@ -1,11 +1,11 @@
 {
 
-  "data_directory": "/home/pi/dht22_data",
+  "data_directory": "/home/pi/humidity",
   "mail_to": [
     "me@example.com"
   ],
   "mail_from": "me@example.com",
-  "averaging": "15min",
+  "averaging": "30min",
   "days_smoothed": 7,
   "days_ranged": 15,
   "location": "lab"

@@ -195,13 +195,12 @@ options = oparser.parse_args()
 with open(options.config_file) as f:
     config = json.load(f)
 
+location = config['location']
 data_location = sensorutils.DataLocation(config['data_directory'], options.verbose)
 
 max_days_ago = max(config['days_smoothed'], config['days_ranged'])
 if options.verbose:
     print('max days ago', max_days_ago)
 
-dataframe_map = data_location.get_dataframes(max_days_ago)
-
-for location0, dataframe0 in dataframe_map.items():
-    generate_mail(location0, dataframe0, config, options.verbose)
+dataframe = data_location.get_dataframe(max_days_ago, location)
+generate_mail(location, dataframe, config, options.verbose)

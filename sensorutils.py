@@ -56,7 +56,7 @@ class DataLocation:
             f.write(output)
         return
 
-    def get_dataframes(self, max_days_ago: int):
+    def get_dataframes(self, max_days_ago: int, location: str) -> pd.DataFrame:
         filenames = self.find_files(max_days_ago)
         dataframes = []
         for fn in filenames:
@@ -72,7 +72,4 @@ class DataLocation:
         if self.verbose:
             print('dataframe', big_dataframe.shape)
         del dataframes
-        locations = set(big_dataframe['location'])
-        if self.verbose:
-            print('Locations:', ', '.join(locations))
-        return {location: big_dataframe[big_dataframe['location'] == location] for location in locations}
+        return big_dataframe[big_dataframe['location'] == location]
