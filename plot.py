@@ -50,15 +50,15 @@ def medianr(x):
     return result
 
 
-def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose: bool):
+def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
     message.set_charset('utf-8')
     message['To'] = ','.join(config1['mail_to'])
     message['From'] = config1['mail_from']
-    message['Subject'] = f'temperature & humidity: {location}'
+    message['Subject'] = f'temperature & humidity: {location0}'
     # https://docs.python.org/3/library/email.examples.html
 
-    buffers = generate_plots(dataframe, config1, verbose)
+    buffers = generate_plots(dataframe0, config1, verbose)
     for buffer in buffers:
         buffer.seek(0)
         img_data = buffer.read()
@@ -74,19 +74,26 @@ def generate_mail(location: str, dataframe: pd.DataFrame, config1: dict, verbose
     return
 
 
-def generate_plots(dataframe: pd.DataFrame, config1: dict, verbose: bool):
+#def produce_plot(dataframe0: pd.DataFrame, property: str) -> BytesIO:
+
+
+
+
+
+def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     days_locator = dates.DayLocator(interval=1)
     days_format = dates.DateFormatter('%d')
 
     pngs = []
-    averaged = dataframe.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+    averaged = dataframe0.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
     averaged = averaged[averaged.index >= cutoff_time]
     if verbose:
         print('Smoothed df', averaged.shape)
 
     columns = [min, meanr, medianr, max]
-    dated = dataframe.groupby('date').agg({'temperature': columns, 'humidity': columns, 'pressure': columns}).rename(
+    dated = dataframe0.groupby('date').agg({'temperature': columns, 'humidity': columns, 'pressure': columns,
+                                           'resistance': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
     cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
     dated = dated[dated.index >= cutoff_date]

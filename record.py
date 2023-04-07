@@ -4,13 +4,13 @@ import datetime
 import json
 import time
 
-import pigpio
-
 import bme680
+
 import sensorutils
 
 
 def get_data(sensor0):
+    resistance0 = None
     while True:
         if sensor0.get_sensor_data():
             temperature0 = sensor0.data.temperature
@@ -20,10 +20,14 @@ def get_data(sensor0):
             epoch0 = int(time.time())
             break
         time.sleep(1)
+
+    if sensor.data.heat_stable:
+        resistance0 = sensor.data.gas_resistance
+
     if options.verbose:
         iso_time = datetime.datetime.isoformat(now0).split('.')[0]
-        print('Measurement:', iso_time, temperature0, humidity0)
-    return epoch0, now0, temperature0, humidity0, pressure0
+        print(f'Measurements {iso_time} {temperature0}°C {humidity0}% {resistance0} Ω')
+    return epoch0, now0, temperature0, humidity0, pressure0, resistance0
 
 
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
@@ -60,5 +64,5 @@ sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
 sensor.select_gas_heater_profile(0)
 
-epoch, now, temperature, humidity, pressure = get_data(sensor)
-data_location.record(epoch, now, location, temperature, humidity, pressure)
+epoch, now, temperature, humidity, pressure, resistance = get_data(sensor)
+data_location.record(epoch, now, location, temperature, humidity, pressure, resistance)
