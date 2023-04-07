@@ -74,10 +74,20 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     return
 
 
-#def produce_plot(dataframe0: pd.DataFrame, property: str) -> BytesIO:
-
-
-
+def produce_plot(dataframe0: pd.DataFrame, column: str,
+                 days_locator, days_format, color: str) -> BytesIO:
+    buffer0 = BytesIO()
+    fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
+    ax0.xaxis.set_major_locator(days_locator)
+    ax0.xaxis.set_major_formatter(days_format)
+    ax0.format_xdata = days_format
+    ax0.grid(True, which='both')
+    ax0.plot(dataframe0.index, dataframe0[column], color)
+    # autofmt needs to happen after data
+    fig0.autofmt_xdate(rotation=60)
+    plt.savefig(buffer0, dpi=200, format='png')
+    plt.close(fig0)
+    return buffer0
 
 
 def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
@@ -100,87 +110,14 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     if verbose:
         print('Dated df', dated.shape)
 
-    # smoothed temperature plot
-    buffer0 = BytesIO()
-    fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
-    ax0.xaxis.set_major_locator(days_locator)
-    ax0.xaxis.set_major_formatter(days_format)
-    ax0.format_xdata = days_format
-    ax0.grid(True, which='both')
-    ax0.plot(averaged.index, averaged['temperature'], '-b')
-    # autofmt needs to happen after data
-    fig0.autofmt_xdate(rotation=60)
-    plt.savefig(buffer0, dpi=200, format='png')
-    plt.close(fig0)
-    pngs.append(buffer0)
-
-    # smoothed humidity plot
-    buffer1 = BytesIO()
-    fig1, ax1 = plt.subplots(figsize=FIG_SIZE)
-    ax1.xaxis.set_major_locator(days_locator)
-    ax1.xaxis.set_major_formatter(days_format)
-    ax1.format_xdata = days_format
-    ax1.grid(True, which='both')
-    ax1.plot(averaged.index, averaged['humidity'], '-g')
-    # autofmt needs to happen after data
-    fig1.autofmt_xdate(rotation=60)
-    plt.savefig(buffer1, dpi=200, format='png')
-    plt.close(fig1)
-    pngs.append(buffer1)
-
-    # smoothed pressure plot
-    buffer1 = BytesIO()
-    fig1, ax1 = plt.subplots(figsize=FIG_SIZE)
-    ax1.xaxis.set_major_locator(days_locator)
-    ax1.xaxis.set_major_formatter(days_format)
-    ax1.format_xdata = days_format
-    ax1.grid(True, which='both')
-    ax1.plot(averaged.index, averaged['pressure'], '-g')
-    # autofmt needs to happen after data
-    fig1.autofmt_xdate(rotation=60)
-    plt.savefig(buffer1, dpi=200, format='png')
-    plt.close(fig1)
-    pngs.append(buffer1)
-
-    # temperature by day
-    buffer2 = BytesIO()
-    fig2, ax2 = plt.subplots(figsize=FIG_SIZE)
-    ax2.xaxis.set_major_locator(days_locator)
-    ax2.xaxis.set_major_formatter(days_format)
-    ax2.format_xdata = days_format
-    ax2.grid(True, which='both')
-    ax2.plot(dated.index, dated['temperature'], '-')
-    fig2.autofmt_xdate(rotation=60)
-    plt.savefig(buffer2, dpi=200, format='png')
-    plt.close(fig2)
-    pngs.append(buffer2)
-
-    # humidity by day
-    buffer3 = BytesIO()
-    fig3, ax3 = plt.subplots(figsize=FIG_SIZE)
-    ax3.xaxis.set_major_locator(days_locator)
-    ax3.xaxis.set_major_formatter(days_format)
-    ax3.format_xdata = days_format
-    ax3.grid(True, which='both')
-    ax3.plot(dated.index, dated['humidity'], '-')
-    fig3.autofmt_xdate(rotation=60)
-    plt.savefig(buffer3, dpi=200, format='png')
-    plt.close(fig3)
-    pngs.append(buffer3)
-
-    # pressure by day
-    buffer3 = BytesIO()
-    fig3, ax3 = plt.subplots(figsize=FIG_SIZE)
-    ax3.xaxis.set_major_locator(days_locator)
-    ax3.xaxis.set_major_formatter(days_format)
-    ax3.format_xdata = days_format
-    ax3.grid(True, which='both')
-    ax3.plot(dated.index, dated['pressure'], '-')
-    fig3.autofmt_xdate(rotation=60)
-    plt.savefig(buffer3, dpi=200, format='png')
-    plt.close(fig3)
-    pngs.append(buffer3)
-
+    pngs.append(produce_plot(averaged, 'temperature', days_locator, days_format, '-b'))
+    pngs.append(produce_plot(averaged, 'humidity', days_locator, days_format, '-g'))
+    pngs.append(produce_plot(averaged, 'pressure', days_locator, days_format, '-b'))
+    pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
+    pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
+    pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
+    pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
+    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
     return pngs
 
 
