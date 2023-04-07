@@ -102,8 +102,8 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
         print('Smoothed df', averaged.shape)
 
     columns = [min, meanr, medianr, max]
-    dated = dataframe0.groupby('date').agg({'temperature': columns, 'humidity': columns, 'pressure': columns,
-                                           'resistance': columns}).rename(
+    dated = dataframe0.groupby('date').agg({'temperature': columns, 'humidity': columns,
+                                            'pressure': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
     cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
     dated = dated[dated.index >= cutoff_date]
@@ -113,11 +113,11 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     pngs.append(produce_plot(averaged, 'temperature', days_locator, days_format, '-b'))
     pngs.append(produce_plot(averaged, 'humidity', days_locator, days_format, '-g'))
     pngs.append(produce_plot(averaged, 'pressure', days_locator, days_format, '-b'))
-    pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
+    # pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
     pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
-    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
+    # pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
     return pngs
 
 
