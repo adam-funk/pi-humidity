@@ -103,7 +103,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
 
     columns = [min, meanr, medianr, max]
     dated = dataframe0.groupby('date').agg({'temperature': columns, 'humidity': columns,
-                                            'pressure': columns}).rename(
+                                            'pressure': columns, 'resistance': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
     cutoff_date = sensorutils.get_cutoff_date(config1['days_ranged'])
     dated = dated[dated.index >= cutoff_date]
@@ -117,7 +117,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
-    #pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
+    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
     return pngs
 
 
