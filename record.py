@@ -46,6 +46,8 @@ def get_data(sensor0, timeout0):
             if cut_high and cut_low:
                 break
             previous_resistance = resistance0
+            if options.verbose:
+                print(f'{resistance0} <- {previous_resistance}')
         time.sleep(1)
 
     time_used = round(elapsed(start))
