@@ -33,6 +33,9 @@ def get_data(sensor0, timeout0):
     cut_high = False
     cut_low = False
 
+    if options.verbose:
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa at {round(elapsed(start))}')
+
     while True and (elapsed(start) < timeout0):
         if sensor0.data.heat_stable:
             resistance0 = sensor0.data.gas_resistance
@@ -49,12 +52,8 @@ def get_data(sensor0, timeout0):
                 print(f'{resistance0} <- {previous_resistance}')
         time.sleep(1)
 
-    time_used = round(elapsed(start))
-
     if options.verbose:
-        iso_time = datetime.datetime.isoformat(now0).split('.')[0]
-        print(f'Measurements {iso_time} {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω')
-        print(f'Time used {time_used}')
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed(start))}')
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0
 
 
