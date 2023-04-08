@@ -48,9 +48,12 @@ def get_data(sensor0, timeout0):
             previous_resistance = resistance0
         time.sleep(1)
 
+    time_used = round(elapsed(start))
+
     if options.verbose:
         iso_time = datetime.datetime.isoformat(now0).split('.')[0]
         print(f'Measurements {iso_time} {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω')
+        print(f'Time used {time_used}')
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0
 
 
