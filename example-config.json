@@ -8,5 +8,6 @@
   "averaging": "30min",
   "days_smoothed": 7,
   "days_ranged": 15,
-  "location": "lab"
+  "location": "lab",
+  "timeout": 180
 }
