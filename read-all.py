@@ -54,10 +54,9 @@ sensor.select_gas_heater_profile(0)
 
 print('\n\nPolling:')
 start = time.time()
+last_gas = 0
 try:
     while True:
-        elapsed = round(time.time() - start)
-        print(f'Elapsed {elapsed}')
         if sensor.get_sensor_data():
             output = '{0:.2f} C,{1:.2f} hPa,{2:.2f} %RH'.format(
                 sensor.data.temperature,
@@ -65,10 +64,13 @@ try:
                 sensor.data.humidity)
 
             if sensor.data.heat_stable:
-                print('{0},{1} Ohms'.format(
-                    output,
-                    sensor.data.gas_resistance))
-
+                gas = sensor.data.gas_resistance
+                print('{0},{1} Ohms'.format(output, gas))
+                elapsed = round(time.time() - start)
+                print(f'Elapsed {elapsed}')
+                if last_gas:
+                    change = (gas/last_gas - 1)
+                    print(f'Ω change {change:0.1%}')
             else:
                 print(output)
 
