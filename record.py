@@ -55,7 +55,7 @@ def get_data(sensor0, timeout0):
 
     if options.verbose:
         print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed(start))}')
-    return epoch0, now0, temperature0, humidity0, pressure0, resistance0
+    return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time
 
 
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
@@ -91,5 +91,5 @@ sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
 sensor.select_gas_heater_profile(0)
 
-epoch, now, temperature, humidity, pressure, resistance = get_data(sensor, timeout)
-data_location.record(epoch, now, location, temperature, humidity, pressure, resistance)
+epoch, now, temperature, humidity, pressure, resistance, elapsed_time = get_data(sensor, timeout)
+data_location.record(epoch, now, location, temperature, humidity, pressure, resistance, elapsed_time)
