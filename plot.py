@@ -117,7 +117,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
-    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
+    #pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
     return pngs
 
 
