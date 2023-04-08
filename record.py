@@ -20,7 +20,7 @@ def get_data(sensor0, timeout0):
     pressure0 = None
     resistance0 = None
     previous_resistance = None
-    while True and (elapsed(start) < timeout0):
+    while elapsed(start) <= timeout0:
         if sensor0.get_sensor_data():
             temperature0 = sensor0.data.temperature
             humidity0 = sensor0.data.humidity
@@ -36,8 +36,8 @@ def get_data(sensor0, timeout0):
     if options.verbose:
         print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa at {round(elapsed(start))}')
 
-    while True and (elapsed(start) < timeout0):
-        if sensor0.data.heat_stable:
+    while elapsed(start) <= timeout0:
+        if sensor0.get_sensor_data() and sensor0.data.heat_stable:
             resistance0 = sensor0.data.gas_resistance
             if previous_resistance:
                 change = resistance0 / previous_resistance - 1.0
