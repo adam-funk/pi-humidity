@@ -20,5 +20,4 @@ plots, intended for use from cron.
 * columns: epoch time, readable time, location, temperature °C, humidity %, pressure hPa, resistance Ω 
 
 ## TODO
-* change TSV to CSV
 * add resistance to plot.py

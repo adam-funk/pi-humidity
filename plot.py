@@ -113,11 +113,11 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     pngs.append(produce_plot(averaged, 'temperature', days_locator, days_format, '-b'))
     pngs.append(produce_plot(averaged, 'humidity', days_locator, days_format, '-g'))
     pngs.append(produce_plot(averaged, 'pressure', days_locator, days_format, '-b'))
-    # pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
+    pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
     pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
-    # pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
+    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
     return pngs
 
 
