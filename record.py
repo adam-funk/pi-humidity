@@ -37,6 +37,7 @@ def get_data(sensor0, timeout0):
         print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa at {round(elapsed(start))}')
 
     while elapsed(start) <= timeout0:
+        # Note: get_sensor_data() is required here or heat_stable will never be True!
         if sensor0.get_sensor_data() and sensor0.data.heat_stable:
             resistance0 = sensor0.data.gas_resistance
             if previous_resistance:
