@@ -55,8 +55,9 @@ class DataLocation:
                elapsed_time: float):
         filename = self.get_filename(iso_time.date())
         iso_time = datetime.datetime.isoformat(iso_time).split('.')[0]
-        output_entries = [convert_item(epoch), iso_time, location, convert_item(temperature), convert_item(humidity),
-                          convert_item(pressure), convert_item(resistance), convert_item(elapsed_time)]
+        output_entries = [convert_item(epoch), iso_time, location, convert_item(temperature),
+                          convert_item(humidity), convert_item(pressure),
+                          convert_item(round(resistance)), convert_item(round(elapsed_time, 1))]
         output_line = ','.join(output_entries) + '\n'
         with open(filename, 'a', encoding='utf-8') as f:
             if self.verbose:
