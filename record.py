@@ -50,7 +50,7 @@ def get_data(sensor0, timeout0):
                 break
             previous_resistance = resistance0
             if options.verbose:
-                print(f'{resistance0} <- {previous_resistance}')
+                print(f'{resistance0} <- {previous_resistance} {cut_low} {cut_high}')
         time.sleep(1)
 
     elapsed_time0 = elapsed(start)
