@@ -53,9 +53,10 @@ def get_data(sensor0, timeout0):
                 print(f'{resistance0} <- {previous_resistance}')
         time.sleep(1)
 
+    elapsed_time0 = elapsed(start)
     if options.verbose:
-        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed(start))}')
-    return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed_time0)}')
+    return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
 
 
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
