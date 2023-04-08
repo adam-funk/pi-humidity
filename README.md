@@ -16,8 +16,14 @@ plots, intended for use from cron.
 * `timeout`: in seconds
 
 ## data file format
-* TSV
-* columns: epoch time, readable time, location, temperature °C, humidity %, pressure hPa, resistance Ω 
+* CSV
+* columns: 
+  * epoch time
+  * readable time
+  * location
+  * temperature °C
+  * humidity %
+  * pressure hPa
+  * resistance Ω
+  * time elapsed to make readings
 
-## TODO
-* add resistance to plot.py
