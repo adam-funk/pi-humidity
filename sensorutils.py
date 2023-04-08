@@ -1,7 +1,7 @@
 # common code for handling the data directory
 
 # filename format:
-# DATA_DIR/sensors-yyyy-mm-dd.tsv
+# DATA_DIR/sensors-yyyy-mm-dd.csv
 
 # file format:
 # epoch, date_time, location, temperature, humidity
@@ -22,6 +22,12 @@ def get_cutoff_time(days_ago: int):
     return datetime.datetime.combine(cutoff_date, datetime.time())
 
 
+def convert_item(item) -> str:
+    if item is None:
+        return ''
+    return str(item)
+
+
 class DataLocation:
 
     def __init__(self, data_directory, verbose):
@@ -33,7 +39,7 @@ class DataLocation:
         Generate the correct filename for the given date.
         """
         date_string = date.isoformat()
-        filename = os.path.join(self.directory, f'sensors-{date_string}.tsv')
+        filename = os.path.join(self.directory, f'sensors-{date_string}.csv')
         return filename
 
     def find_files(self, max_days_ago: int):
@@ -48,12 +54,14 @@ class DataLocation:
                temperature: float, humidity: float, pressure: float, resistance: float):
         filename = self.get_filename(iso_time.date())
         iso_time = datetime.datetime.isoformat(iso_time).split('.')[0]
-        output = f'{epoch}\t{iso_time}\t{location}\t{temperature or ""}\t{humidity or ""}\t{pressure or ""}\t{resistance or ""}\n'
+        output_entries = [epoch, iso_time, location, convert_item(temperature), convert_item(humidity),
+                          convert_item(pressure), convert_item(resistance)]
+        output_line = ','.join(output_entries) + '\n'
         with open(filename, 'a', encoding='utf-8') as f:
             if self.verbose:
                 print('writing to', filename)
-                print(output)
-            f.write(output)
+                print(output_line)
+            f.write(output_line)
         return
 
     def get_dataframe(self, max_days_ago: int, location: str) -> pd.DataFrame:
@@ -62,12 +70,10 @@ class DataLocation:
         for fn in filenames:
             if self.verbose:
                 print('Reading', fn)
-            dataframes.append(pd.read_csv(fn, sep='\t', header=None, names=COLUMNS))
+            dataframes.append(pd.read_csv(fn, header=None, names=COLUMNS))
         big_dataframe = pd.concat(dataframes)
         big_dataframe['timestamp'] = pd.to_datetime(big_dataframe['iso_time'])
         big_dataframe['date'] = big_dataframe['timestamp'].dt.date
-        # filter out error readings
-        big_dataframe = big_dataframe[(big_dataframe['temperature'] > -999) & (big_dataframe['humidity'] > -999) ]
         big_dataframe = big_dataframe.sort_values(by='timestamp', axis=0)
         if self.verbose:
             print('dataframe', big_dataframe.shape)
