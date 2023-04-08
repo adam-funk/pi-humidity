@@ -14,7 +14,6 @@ def elapsed(start):
 
 
 def get_data(sensor0, timeout0):
-    resistance0 = None
     start = time.time()
     temperature0 = None
     humidity0 = None
@@ -35,8 +34,8 @@ def get_data(sensor0, timeout0):
     cut_low = False
 
     while True and (elapsed(start) < timeout0):
-        if sensor.data.heat_stable:
-            resistance0 = sensor.data.gas_resistance
+        if sensor0.data.heat_stable:
+            resistance0 = sensor0.data.gas_resistance
             if previous_resistance:
                 change = resistance0 / previous_resistance - 1.0
                 if 0.0 <= change < 0.5:
@@ -83,12 +82,10 @@ timeout = config.get('timeout', 180)
 # https://learn.pimoroni.com/article/getting-started-with-bme680-breakout
 
 sensor = bme680.BME680()
-
 sensor.set_humidity_oversample(bme680.OS_2X)
 sensor.set_pressure_oversample(bme680.OS_4X)
 sensor.set_temperature_oversample(bme680.OS_8X)
 sensor.set_filter(bme680.FILTER_SIZE_3)
-
 sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
 sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)

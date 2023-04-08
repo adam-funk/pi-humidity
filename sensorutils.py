@@ -48,7 +48,7 @@ class DataLocation:
                temperature: float, humidity: float, pressure: float, resistance: float):
         filename = self.get_filename(iso_time.date())
         iso_time = datetime.datetime.isoformat(iso_time).split('.')[0]
-        output = f'{epoch}\t{iso_time}\t{location}\t{temperature}\t{humidity}\t{pressure}\t{resistance}\n'
+        output = f'{epoch}\t{iso_time}\t{location}\t{temperature or ""}\t{humidity or ""}\t{pressure or ""}\t{resistance or ""}\n'
         with open(filename, 'a', encoding='utf-8') as f:
             if self.verbose:
                 print('writing to', filename)
