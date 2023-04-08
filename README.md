@@ -22,6 +22,4 @@ plots, intended for use from cron.
 ## TODO
 * change TSV to CSV
   * existing data
-* add column for elapsed time
 * add resistance to plot.py
-* tidy up empty string for None
