@@ -71,6 +71,7 @@ try:
                 if last_gas:
                     change = (gas/last_gas - 1)
                     print(f'Ω change {change:0.1%}')
+                last_gas = gas
             else:
                 print(output)
 
