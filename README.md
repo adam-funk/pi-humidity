@@ -1,6 +1,6 @@
 # pi-humidity
 
-Tools for logging DHT22 temperature and humidity and generating
+Tools for logging BME680 air data and generating
 plots, intended for use from cron.
 
 ## required config file
