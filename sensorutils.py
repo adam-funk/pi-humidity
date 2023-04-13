@@ -79,5 +79,6 @@ class DataLocation:
         big_dataframe = big_dataframe.sort_values(by='timestamp', axis=0)
         if self.verbose:
             print('dataframe', big_dataframe.shape)
+            print('columns', big_dataframe.columns)
         del dataframes
         return big_dataframe[big_dataframe['location'] == location]
