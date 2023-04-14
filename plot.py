@@ -60,7 +60,9 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     message['Subject'] = f'temperature & humidity: {location0}'
     # https://docs.python.org/3/library/email.examples.html
 
-    buffers = generate_plots(dataframe0, config1, verbose)
+    buffers, html = generate_plots(dataframe0, config1, verbose)
+    message.add_attachment(html.encode('utf-8'), disposition='inline',
+                           maintype='text', subtype='html')
     for buffer in buffers:
         buffer.seek(0)
         img_data = buffer.read()
@@ -96,6 +98,16 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     days_locator = dates.DayLocator(interval=1)
     days_format = dates.DateFormatter('%d')
 
+    agg_columns = [min, meanr, medianr, max]
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='ignore', message='All-NaN slice encountered')
+        date_data = dataframe0.groupby('date').agg({'temperature': agg_columns,
+                                                    'humidity': agg_columns,
+                                                    'pressure': agg_columns,
+                                                    'resistance': agg_columns}).rename(
+            columns={'meanr': 'mean', 'medianr': 'mdn'})
+    html = date_data.to_html()
+
     pngs = []
     averaged = dataframe0.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
@@ -120,7 +132,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
     pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
-    return pngs
+    return pngs, html
 
 
 oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
