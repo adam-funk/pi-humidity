@@ -61,14 +61,14 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     # https://docs.python.org/3/library/email.examples.html
 
     buffers, html = generate_plots(dataframe0, config1, verbose)
-    message.add_attachment(html.encode('utf-8'), disposition='inline',
-                           maintype='text', subtype='html')
     for buffer in buffers:
         buffer.seek(0)
         img_data = buffer.read()
         message.add_attachment(img_data, maintype='image',
                                disposition='inline',
                                subtype=imghdr.what(None, img_data))
+    message.add_attachment(html.encode('utf-8'), disposition='inline',
+                           maintype='text', subtype='html')
     basic_message = f'{datetime.datetime.now().isoformat().split("T")[0]}\n{platform.node()}'
     message.add_attachment(basic_message.encode('utf-8'),
                            disposition='inline',
