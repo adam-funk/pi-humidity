@@ -42,20 +42,21 @@ def get_data(sensor0, timeout0):
             resistance0 = sensor0.data.gas_resistance
             if previous_resistance:
                 change = resistance0 / previous_resistance - 1.0
-                if 0.0 <= change < 0.5:
+                if 0.0 <= change < 0.01:
                     cut_high = True
-                if -0.5 < change <= 0.0:
+                if -0.01 < change <= 0.0:
                     cut_low = True
+            if options.verbose:
+                print(f'{resistance0} <- {previous_resistance} {cut_low} {cut_high}')
             if cut_high and cut_low:
                 break
             previous_resistance = resistance0
-            if options.verbose:
-                print(f'{resistance0} <- {previous_resistance}')
         time.sleep(1)
 
+    elapsed_time0 = elapsed(start)
     if options.verbose:
-        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed(start))}')
-    return epoch0, now0, temperature0, humidity0, pressure0, resistance0
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed_time0)}')
+    return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
 
 
 oparser = argparse.ArgumentParser(description="Client for temperature logging",
@@ -91,5 +92,5 @@ sensor.set_gas_heater_temperature(320)
 sensor.set_gas_heater_duration(150)
 sensor.select_gas_heater_profile(0)
 
-epoch, now, temperature, humidity, pressure, resistance = get_data(sensor, timeout)
-data_location.record(epoch, now, location, temperature, humidity, pressure, resistance)
+epoch, now, temperature, humidity, pressure, resistance, elapsed_time = get_data(sensor, timeout)
+data_location.record(epoch, now, location, temperature, humidity, pressure, resistance, elapsed_time)

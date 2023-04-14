@@ -109,7 +109,8 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     html = date_data.to_html()
 
     pngs = []
-    averaged = dataframe0.groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
+    averaged = dataframe0.drop(labels=['iso_time', 'location', 'date'],
+                               axis=1).groupby(pd.Grouper(key='timestamp', freq=config1['averaging'])).mean()
     cutoff_time = sensorutils.get_cutoff_time(config1['days_smoothed'])
     averaged = averaged[averaged.index >= cutoff_time]
     if verbose:
