@@ -57,6 +57,7 @@ def get_data(sensor0, timeout0):
     if options.verbose:
         print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed_time0)}')
     resistance0 = round(resistance0)
+    elapsed_time0 = round(elapsed_time0)
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
 
 
