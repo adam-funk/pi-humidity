@@ -78,14 +78,15 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     return
 
 
-def produce_plot(dataframe0: pd.DataFrame, column: str, color: str) -> BytesIO:
+def produce_plot(dataframe0: pd.DataFrame, column: str, color: str, minor: bool) -> BytesIO:
     days_locator = dates.DayLocator(interval=1)
-    minor_locator = dates.HourLocator(byhour=[0, 6, 12, 18])
     days_format = dates.DateFormatter('%d')
     buffer0 = BytesIO()
     fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
     ax0.xaxis.set_major_locator(days_locator)
-    ax0.xaxis.set_minor_locator(minor_locator)
+    if minor:
+        minor_locator = dates.HourLocator(byhour=[0, 6, 12, 18])
+        ax0.xaxis.set_minor_locator(minor_locator)
     ax0.xaxis.set_major_formatter(days_format)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
@@ -125,14 +126,14 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     if verbose:
         print('Dated df', dated.shape)
 
-    pngs.append(produce_plot(averaged, 'temperature', '-b'))
-    pngs.append(produce_plot(averaged, 'humidity', '-g'))
-    pngs.append(produce_plot(averaged, 'pressure', '-b'))
-    pngs.append(produce_plot(averaged, 'resistance', '-r'))
-    pngs.append(produce_plot(dated, 'temperature', '-'))
-    pngs.append(produce_plot(dated, 'humidity', '-'))
-    pngs.append(produce_plot(dated, 'pressure', '-'))
-    pngs.append(produce_plot(dated, 'resistance', '-'))
+    pngs.append(produce_plot(averaged, 'temperature', '-b', True))
+    pngs.append(produce_plot(averaged, 'humidity', '-g', True))
+    pngs.append(produce_plot(averaged, 'pressure', '-b', True))
+    pngs.append(produce_plot(averaged, 'resistance', '-r', True))
+    pngs.append(produce_plot(dated, 'temperature', '-', False))
+    pngs.append(produce_plot(dated, 'humidity', '-', False))
+    pngs.append(produce_plot(dated, 'pressure', '-', False))
+    pngs.append(produce_plot(dated, 'resistance', '-', False))
     return pngs, html
 
 
