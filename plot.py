@@ -60,7 +60,7 @@ def minr(x):
 
 
 def maxr(x):
-    m = min(x)
+    m = max(x)
     if np.isnan(m):
         return np.nan
     return round(m, 1)
