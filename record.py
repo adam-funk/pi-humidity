@@ -24,8 +24,8 @@ def get_data(sensor0, timeout0):
     while elapsed(start) <= timeout0:
         if sensor0.get_sensor_data():
             temperature0 = round(sensor0.data.temperature, 1)
-            humidity0 = round(sensor0.data.humidity)
-            pressure0 = round(sensor0.data.pressure)
+            humidity0 = round(sensor0.data.humidity, 1)
+            pressure0 = round(sensor0.data.pressure, 1)
             break
         time.sleep(1)
 
@@ -35,7 +35,7 @@ def get_data(sensor0, timeout0):
     cut_low = False
 
     if options.verbose:
-        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa at {round(elapsed(start))}')
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa at {elapsed(start)}')
 
     while elapsed(start) <= timeout0:
         # Note: get_sensor_data() is required here or heat_stable will never be True!
@@ -55,8 +55,8 @@ def get_data(sensor0, timeout0):
         time.sleep(1)
 
     # change Ω to kΩ
-    resistance0 = round(resistance0 / 1000)
-    elapsed_time0 = round(elapsed(start))
+    resistance0 = round(resistance0 / 1000, 1)
+    elapsed_time0 = round(elapsed(start), 1)
     if options.verbose:
         print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} kΩ at {elapsed_time0}')
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
