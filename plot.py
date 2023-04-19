@@ -78,11 +78,14 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     return
 
 
-def produce_plot(dataframe0: pd.DataFrame, column: str,
-                 days_locator, days_format, color: str) -> BytesIO:
+def produce_plot(dataframe0: pd.DataFrame, column: str, color: str) -> BytesIO:
+    days_locator = dates.DayLocator(interval=1)
+    minor_locator = dates.HourLocator(byhour=[0, 6, 12, 18])
+    days_format = dates.DateFormatter('%d')
     buffer0 = BytesIO()
     fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
     ax0.xaxis.set_major_locator(days_locator)
+    ax0.xaxis.set_minor_locator(minor_locator)
     ax0.xaxis.set_major_formatter(days_format)
     ax0.format_xdata = days_format
     ax0.grid(True, which='both')
@@ -95,9 +98,6 @@ def produce_plot(dataframe0: pd.DataFrame, column: str,
 
 
 def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
-    days_locator = dates.DayLocator(interval=1)
-    days_format = dates.DateFormatter('%d')
-
     agg_columns = [min, meanr, medianr, max]
     with warnings.catch_warnings():
         warnings.filterwarnings(action='ignore', message='All-NaN slice encountered')
@@ -125,14 +125,14 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     if verbose:
         print('Dated df', dated.shape)
 
-    pngs.append(produce_plot(averaged, 'temperature', days_locator, days_format, '-b'))
-    pngs.append(produce_plot(averaged, 'humidity', days_locator, days_format, '-g'))
-    pngs.append(produce_plot(averaged, 'pressure', days_locator, days_format, '-b'))
-    pngs.append(produce_plot(averaged, 'resistance', days_locator, days_format, '-r'))
-    pngs.append(produce_plot(dated, 'temperature', days_locator, days_format, '-'))
-    pngs.append(produce_plot(dated, 'humidity', days_locator, days_format, '-'))
-    pngs.append(produce_plot(dated, 'pressure', days_locator, days_format, '-'))
-    pngs.append(produce_plot(dated, 'resistance', days_locator, days_format, '-'))
+    pngs.append(produce_plot(averaged, 'temperature', '-b'))
+    pngs.append(produce_plot(averaged, 'humidity', '-g'))
+    pngs.append(produce_plot(averaged, 'pressure', '-b'))
+    pngs.append(produce_plot(averaged, 'resistance', '-r'))
+    pngs.append(produce_plot(dated, 'temperature', '-'))
+    pngs.append(produce_plot(dated, 'humidity', '-'))
+    pngs.append(produce_plot(dated, 'pressure', '-'))
+    pngs.append(produce_plot(dated, 'resistance', '-'))
     return pngs, html
 
 
