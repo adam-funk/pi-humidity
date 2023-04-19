@@ -52,6 +52,14 @@ def medianr(x):
     return result
 
 
+def minr(x):
+    return round(min(x))
+
+
+def maxr(x):
+    return round(max(x))
+
+
 def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     message = EmailMessage()
     message.set_charset('utf-8')
@@ -100,14 +108,14 @@ def produce_plot(dataframe0: pd.DataFrame, column: str, color: str, minor: bool)
 
 
 def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
-    agg_columns = [min, meanr, medianr, max]
+    agg_columns = [minr, meanr, medianr, maxr]
     with warnings.catch_warnings():
         warnings.filterwarnings(action='ignore', message='All-NaN slice encountered')
         date_data = dataframe0.groupby('date').agg({'temperature': agg_columns,
                                                     'humidity': agg_columns,
                                                     'pressure': agg_columns,
                                                     'resistance': agg_columns}).rename(
-            columns={'meanr': 'mean', 'medianr': 'mdn'})
+            columns={'minr': 'min', 'meanr': 'mean', 'medianr': 'mdn', 'maxr': max})
     html = date_data.to_html()
 
     pngs = []
