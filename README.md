@@ -25,5 +25,8 @@ plots, intended for use from cron.
   * humidity %
   * pressure hPa
   * resistance Ω
-  * time elapsed to make readings
+  * time required to make readings
 
+## TODO
+* change Ω to kΩ
+* temporary script to convert existing files
