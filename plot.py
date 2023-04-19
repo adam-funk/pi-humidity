@@ -56,14 +56,14 @@ def minr(x):
     m = min(x)
     if np.isnan(m):
         return np.nan
-    return round(m)
+    return round(m, 1)
 
 
 def maxr(x):
     m = min(x)
     if np.isnan(m):
         return np.nan
-    return round(m)
+    return round(m, 1)
 
 
 def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbose: bool):
@@ -121,7 +121,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
                                                     'humidity': agg_columns,
                                                     'pressure': agg_columns,
                                                     'resistance': agg_columns}).rename(
-            columns={'minr': 'min', 'meanr': 'mean', 'medianr': 'mdn', 'maxr': max})
+            columns={'minr': 'min', 'meanr': 'mean', 'medianr': 'mdn', 'maxr': 'max'})
     html = date_data.to_html()
 
     pngs = []
