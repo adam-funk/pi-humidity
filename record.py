@@ -8,6 +8,7 @@ import bme680
 
 import sensorutils
 
+CUT_THRESHOLD = 0.01
 
 def elapsed(start):
     return time.time() - start
@@ -42,9 +43,9 @@ def get_data(sensor0, timeout0):
             resistance0 = sensor0.data.gas_resistance
             if previous_resistance:
                 change = resistance0 / previous_resistance - 1.0
-                if 0.0 <= change < 0.01:
+                if 0.0 <= change < CUT_THRESHOLD:
                     cut_high = True
-                if -0.01 < change <= 0.0:
+                if - CUT_THRESHOLD < change <= 0.0:
                     cut_low = True
             if options.verbose:
                 print(f'{resistance0} <- {previous_resistance} {cut_low} {cut_high}')
@@ -53,11 +54,11 @@ def get_data(sensor0, timeout0):
             previous_resistance = resistance0
         time.sleep(1)
 
-    elapsed_time0 = elapsed(start)
+    # change Ω to kΩ
+    resistance0 = round(resistance0 / 1000)
+    elapsed_time0 = round(elapsed(start))
     if options.verbose:
-        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} Ω at {round(elapsed_time0)}')
-    resistance0 = round(resistance0)
-    elapsed_time0 = round(elapsed_time0)
+        print(f'Measurements {temperature0}°C {humidity0}% {pressure0} hPa {resistance0} kΩ at {elapsed_time0}')
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
 
 
