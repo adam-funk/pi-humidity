@@ -19,7 +19,7 @@ def process(filename):
     return
 
 
-parser = argparse.ArgumentParser(description="Client for temperature logging",
+parser = argparse.ArgumentParser(description="Convert data files from Ω to kΩ",
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('files', metavar='FILE(S)', nargs='*',

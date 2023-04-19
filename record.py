@@ -62,7 +62,7 @@ def get_data(sensor0, timeout0):
     return epoch0, now0, temperature0, humidity0, pressure0, resistance0, elapsed_time0
 
 
-oparser = argparse.ArgumentParser(description="Client for temperature logging",
+oparser = argparse.ArgumentParser(description="Record sensor data",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 oparser.add_argument("-v", dest="verbose",

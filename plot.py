@@ -152,7 +152,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     return pngs, html
 
 
-oparser = argparse.ArgumentParser(description="Plotter for temperature and humidity log",
+oparser = argparse.ArgumentParser(description="Plot sensor data",
                                   formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 oparser.add_argument("-v", dest="verbose",
