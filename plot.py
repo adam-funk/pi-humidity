@@ -53,11 +53,17 @@ def medianr(x):
 
 
 def minr(x):
-    return round(min(x))
+    m = min(x)
+    if np.isnan(m):
+        return np.nan
+    return round(m)
 
 
 def maxr(x):
-    return round(max(x))
+    m = min(x)
+    if np.isnan(m):
+        return np.nan
+    return round(m)
 
 
 def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbose: bool):
