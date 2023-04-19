@@ -87,9 +87,10 @@ def produce_plot(dataframe0: pd.DataFrame, column: str, color: str, minor: bool)
     if minor:
         minor_locator = dates.HourLocator(byhour=[0, 6, 12, 18])
         ax0.xaxis.set_minor_locator(minor_locator)
+        ax0.grid(True, which='minor', color='silver')
     ax0.xaxis.set_major_formatter(days_format)
     ax0.format_xdata = days_format
-    ax0.grid(True, which='both')
+    ax0.grid(True, which='major', color='darkgray')
     ax0.plot(dataframe0.index, dataframe0[column], color)
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
