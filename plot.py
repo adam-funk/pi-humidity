@@ -8,7 +8,7 @@ import platform
 import warnings
 from email.message import EmailMessage
 from io import BytesIO
-from subprocess import Popen, PIPE
+import subprocess
 
 import matplotlib
 
@@ -32,6 +32,7 @@ import pandas as pd
 import sensorutils
 
 FIG_SIZE = (7, 2)
+SENDMAIL = ["/usr/sbin/sendmail", "-t", "-oi"]
 
 
 def meanr(x):
@@ -87,8 +88,7 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
     message.add_attachment(basic_message.encode('utf-8'),
                            disposition='inline',
                            maintype='text', subtype='plain')
-    p = Popen(["/usr/sbin/sendmail", "-t", "-oi"], stdin=PIPE)
-    p.communicate(message.as_bytes())
+    subprocess.run(SENDMAIL, input=message.as_bytes())
     return
 
 
