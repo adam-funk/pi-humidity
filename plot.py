@@ -84,7 +84,8 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
                                subtype=imghdr.what(None, img_data))
     message.add_attachment(html.encode('utf-8'), disposition='inline',
                            maintype='text', subtype='html')
-    basic_message = f'{datetime.datetime.now().isoformat().split("T")[0]}\n{platform.node()}'
+    timestamp = datetime.datetime.now().isoformat(sep='\n', timespec='seconds')
+    basic_message = f'{timestamp}\n{platform.node()}'
     message.add_attachment(basic_message.encode('utf-8'),
                            disposition='inline',
                            maintype='text', subtype='plain')
