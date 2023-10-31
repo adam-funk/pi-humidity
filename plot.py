@@ -100,7 +100,7 @@ def produce_plot(dataframe0: pd.DataFrame, column: str, color: str, minor: bool,
     fig0, ax0 = plt.subplots(figsize=FIG_SIZE)
     ax0.xaxis.set_major_locator(days_locator)
     if ylabel:
-        ax0.set_ylabel(ylabel, loc='center', rotation='horizontal')
+        ax0.set_ylabel(ylabel, loc='top', rotation='horizontal')
     if minor:
         minor_locator = dates.HourLocator(byhour=[0, 6, 12, 18])
         ax0.xaxis.set_minor_locator(minor_locator)
