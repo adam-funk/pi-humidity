@@ -10,6 +10,7 @@ import sensorutils
 
 CUT_THRESHOLD = 0.01
 
+
 def elapsed(start):
     return time.time() - start
 
