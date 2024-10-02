@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import argparse
 import datetime
@@ -135,7 +136,7 @@ def generate_plots(dataframe0: pd.DataFrame, config1: dict, verbose: bool):
     if verbose:
         print('Smoothed df', averaged.shape)
 
-    columns = [min, meanr, medianr, max]
+    columns = ['min', 'meanr', 'medianr', 'max']
     dated = dataframe0.groupby('date').agg({'temperature': columns, 'humidity': columns,
                                             'pressure': columns, 'resistance': columns}).rename(
         columns={'meanr': 'mean', 'medianr': 'mdn'})
