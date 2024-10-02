@@ -2,7 +2,6 @@
 
 import argparse
 import datetime
-import imghdr
 import json
 import platform
 import warnings
@@ -33,6 +32,7 @@ import sensorutils
 
 FIG_SIZE = (7, 2)
 SENDMAIL = ["/usr/sbin/sendmail", "-t", "-oi"]
+IMG_TYPE = 'png'
 
 
 def meanr(x):
@@ -81,7 +81,7 @@ def generate_mail(location0: str, dataframe0: pd.DataFrame, config1: dict, verbo
         img_data = buffer.read()
         message.add_attachment(img_data, maintype='image',
                                disposition='inline',
-                               subtype=imghdr.what(None, img_data))
+                               subtype=IMG_TYPE)
     message.add_attachment(html.encode('utf-8'), disposition='inline',
                            maintype='text', subtype='html')
     timestamp = datetime.datetime.now().isoformat(sep='\n', timespec='seconds')
@@ -111,7 +111,7 @@ def produce_plot(dataframe0: pd.DataFrame, column: str, color: str, minor: bool,
     ax0.plot(dataframe0.index, dataframe0[column], color)
     # autofmt needs to happen after data
     fig0.autofmt_xdate(rotation=60)
-    plt.savefig(buffer0, dpi=200, format='png')
+    plt.savefig(buffer0, dpi=200, format=IMG_TYPE)
     plt.close(fig0)
     return buffer0
 
